@@ -44,8 +44,8 @@ const WordDisplay = memo(function WordDisplay({
               char.status === "correct"
                 ? "text-primary"
                 : char.status === "incorrect"
-                  ? "text-destructive"
-                  : "text-muted-foreground"
+                ? "text-destructive"
+                : "text-muted-foreground"
             }`}
           >
             {isCurrentChar && (
@@ -114,7 +114,7 @@ const TypingPractice = () => {
   const difficulty = useSettingsStore((state) => state.difficulty);
   const includeNumbers = useSettingsStore((state) => state.includeNumbers);
   const includePunctuation = useSettingsStore(
-    (state) => state.includePunctuation,
+    (state) => state.includePunctuation
   );
 
   const showOverlay = !revealed || paused;
@@ -333,7 +333,7 @@ const TypingPractice = () => {
     if (mode === "time") {
       const remainingSeconds = Math.max(
         0,
-        timeLimit - Math.floor(elapsedTime / 1000),
+        timeLimit - Math.floor(elapsedTime / 1000)
       );
       return `${remainingSeconds}`;
     } else if (mode === "word") {
@@ -362,7 +362,7 @@ const TypingPractice = () => {
       >
         {/* Blur overlay when paused/not started */}
         {showOverlay && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50">
+          <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50">
             {loading ? "Loading..." : getOverlayMessage()}
           </div>
         )}
