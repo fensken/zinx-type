@@ -117,7 +117,7 @@ const TypingPractice = () => {
     (state) => state.includePunctuation
   );
 
-  const showOverlay = !revealed || paused;
+  const showOverlay = !revealed;
   const testActive =
     startTime !== null && endTime === null && !paused && revealed;
 
@@ -317,15 +317,10 @@ const TypingPractice = () => {
   const handleClick = useCallback(() => {
     if (!revealed) {
       setRevealed(true);
+    } else if (paused) {
+      resumeTest();
     }
-  }, [revealed]);
-
-  const getOverlayMessage = () => {
-    if (paused) {
-      return "Test paused. Press any key to continue";
-    }
-    return "Click or press any key to start";
-  };
+  }, [revealed, paused, resumeTest]);
 
   const progressDisplay = (() => {
     if (!testActive && startTime === null) return null;
@@ -360,10 +355,14 @@ const TypingPractice = () => {
         className="relative overflow-hidden"
         style={{ height: `${lineHeight * 3}px` }}
       >
-        {/* Blur overlay when paused/not started */}
+        {/* Blur overlay when not revealed */}
         {showOverlay && (
           <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50">
-            {loading ? "Loading..." : getOverlayMessage()}
+            {loading
+              ? "Loading..."
+              : paused
+                ? "Paused! Press any key to continue."
+                : "Click or press any key to start"}
           </div>
         )}
 

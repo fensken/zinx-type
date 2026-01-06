@@ -22,7 +22,7 @@ const Footer = () => {
           href="https://github.com/fensken"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm"
+          className="flex items-center gap-2 underline text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm"
         >
           <Github className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           <span>@fensken</span>

@@ -16,8 +16,8 @@ import { useSettingsStore, TestMode } from "@/store/settingsStore";
 import { Difficulty } from "@/data/quotes";
 
 const TypingToolbar = () => {
-  const timeOptions = [15, 30, 60, 120];
-  const wordOptions = [10, 25, 50, 100];
+  const timeOptions = [15, 30, 60, 120, 180];
+  const wordOptions = [10, 25, 50, 100, 150];
 
   const mode = useSettingsStore((state) => state.mode);
   const wordCount = useSettingsStore((state) => state.wordCount);
