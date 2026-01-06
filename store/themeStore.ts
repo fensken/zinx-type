@@ -20,7 +20,8 @@ export type ThemeName =
   | "gruvbox"
   | "catppuccin"
   | "solarized"
-  | "one-dark";
+  | "one-dark"
+  | "ayu-dark";
 
 export interface ThemeOption {
   value: ThemeName;
@@ -149,5 +150,10 @@ export const themeOptions: ThemeOption[] = [
     value: "one-dark",
     label: "One Dark",
     colors: { bg: "#282c34", primary: "#61afef", text: "#abb2bf" },
+  },
+  {
+    value: "ayu-dark",
+    label: "Ayu Dark",
+    colors: { bg: "#0d1017", primary: "#e6b450", text: "#bfbdb6" },
   },
 ];

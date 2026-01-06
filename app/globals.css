@@ -562,6 +562,31 @@
     --error-extra: #e06c75aa;
 }
 
+/* Theme: Ayu Dark */
+.theme-ayu-dark {
+    --background: #0d1017;
+    --foreground: #bfbdb6;
+    --card: #131721;
+    --card-foreground: #bfbdb6;
+    --popover: #131721;
+    --popover-foreground: #bfbdb6;
+    --primary: #e6b450;
+    --primary-foreground: #0d1017;
+    --secondary: #1c212b;
+    --secondary-foreground: #bfbdb6;
+    --muted: #1c212b;
+    --muted-foreground: #565b66;
+    --accent: #1c212b;
+    --accent-foreground: #bfbdb6;
+    --destructive: #f07178;
+    --border: #565b66;
+    --input: #1c212b;
+    --ring: #e6b450;
+    --caret: #e6b450;
+    --error: #f07178;
+    --error-extra: #f07178aa;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
@@ -575,4 +600,85 @@
     button {
         @apply cursor-pointer;
     }
+}
+
+/* Font classes for typing text */
+.font-geist-mono {
+    font-family: var(--font-geist-mono), monospace;
+}
+
+.font-jetbrains {
+    font-family: var(--font-jetbrains), monospace;
+}
+
+.font-fira-code {
+    font-family: var(--font-fira-code), monospace;
+}
+
+.font-source-code {
+    font-family: var(--font-source-code), monospace;
+}
+
+.font-ibm-plex {
+    font-family: var(--font-ibm-plex), monospace;
+}
+
+.font-roboto-mono {
+    font-family: var(--font-roboto-mono), monospace;
+}
+
+.font-ubuntu-mono {
+    font-family: var(--font-ubuntu-mono), monospace;
+}
+
+.font-inconsolata {
+    font-family: var(--font-inconsolata), monospace;
+}
+
+.font-space-mono {
+    font-family: var(--font-space-mono), monospace;
+}
+
+.font-dm-mono {
+    font-family: var(--font-dm-mono), monospace;
+}
+
+.font-courier-prime {
+    font-family: var(--font-courier-prime), monospace;
+}
+
+.font-overpass-mono {
+    font-family: var(--font-overpass-mono), monospace;
+}
+
+.font-red-hat-mono {
+    font-family: var(--font-red-hat-mono), monospace;
+}
+
+.font-azeret-mono {
+    font-family: var(--font-azeret-mono), monospace;
+}
+
+.font-martian-mono {
+    font-family: var(--font-martian-mono), monospace;
+}
+
+.font-sono {
+    font-family: var(--font-sono), monospace;
+}
+
+.font-share-tech {
+    font-family: var(--font-share-tech), monospace;
+}
+
+.font-anonymous-pro {
+    font-family: var(--font-anonymous-pro), monospace;
+}
+
+.font-pt-mono {
+    font-family: var(--font-pt-mono), monospace;
+}
+
+.font-major-mono {
+    font-family: var(--font-major-mono), monospace;
 }

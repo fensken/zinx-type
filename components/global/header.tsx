@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import ThemeSwitcher from "./theme-switcher";
+import FontSwitcher from "./font-switcher";
 
 const Header = () => {
   return (
@@ -16,6 +17,7 @@ const Header = () => {
       </Link>
 
       <div className="flex items-center gap-2">
+        <FontSwitcher />
         <ThemeSwitcher />
       </div>
     </header>

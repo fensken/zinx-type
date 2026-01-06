@@ -4,6 +4,7 @@ import { generateWords } from "@/data/words";
 import { getRandomQuote } from "@/data/quotes";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
+import { useFontStore, fontOptions } from "@/store/fontStore";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,6 @@ import {
   useLayoutEffect,
   memo,
 } from "react";
-import { useRouter } from "next/navigation";
 import type { Word } from "@/store/typingStore";
 
 // Generate words for fast typers (400 WPM)
@@ -81,7 +81,6 @@ const WordDisplay = memo(function WordDisplay({
 });
 
 const TypingPractice = () => {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [revealed, setRevealed] = useState(false);
   const [quoteSource, setQuoteSource] = useState<string | null>(null);
@@ -116,6 +115,10 @@ const TypingPractice = () => {
   const includePunctuation = useSettingsStore(
     (state) => state.includePunctuation
   );
+
+  const font = useFontStore((state) => state.font);
+  const fontClassName =
+    fontOptions.find((f) => f.value === font)?.className || "font-geist-mono";
 
   const showOverlay = !revealed;
   const testActive =
@@ -238,13 +241,6 @@ const TypingPractice = () => {
     };
   }, [testActive, mode, timeLimit, getElapsedTime, endTest]);
 
-  // Navigate to results when test ends
-  useEffect(() => {
-    if (endTime !== null) {
-      router.push("/results");
-    }
-  }, [endTime, router]);
-
   // Mouse movement handler
   useEffect(() => {
     const handleMouseMove = () => {
@@ -344,7 +340,9 @@ const TypingPractice = () => {
     <div className="relative w-full mt-16 sm:mt-24 md:mt-32">
       {/* Progress indicator */}
       {progressDisplay && !showOverlay && (
-        <div className="absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono text-primary">
+        <div
+          className={`absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono ${paused ? "text-amber-500" : "text-primary"}`}
+        >
           {progressDisplay}
         </div>
       )}
@@ -361,15 +359,15 @@ const TypingPractice = () => {
             {loading
               ? "Loading..."
               : paused
-                ? "Paused! Press any key to continue."
-                : "Click or press any key to start"}
+              ? "Paused! Press any key to continue."
+              : "Click or press any key to start"}
           </div>
         )}
 
         {/* Words wrapper - scrolls up */}
         <div
           ref={wordsContainerRef}
-          className="flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-2 text-lg sm:text-xl md:text-2xl font-mono transition-transform duration-100 ease-out"
+          className={`flex flex-wrap gap-x-2 sm:gap-x-3 font-medium gap-y-2 text-lg sm:text-xl md:text-2xl ${fontClassName} transition-transform duration-100 ease-out`}
           style={{
             transform: `translateY(-${scrollTop}px)`,
           }}
