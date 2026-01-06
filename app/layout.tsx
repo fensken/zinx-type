@@ -118,7 +118,7 @@ export default function RootLayout({
           defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
-          storageKey="zinx-theme"
+          storageKey="zinx-base-theme"
         >
           <Header />
           {children}
