@@ -45,7 +45,7 @@ type ThemeStore = ThemeState & ThemeActions;
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set) => ({
-      theme: "serika-dark",
+      theme: "dark",
       setTheme: (theme) => set({ theme }),
     }),
     {
