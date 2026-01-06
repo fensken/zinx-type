@@ -218,7 +218,7 @@ export const metadata: Metadata = {
     title: "Zinx Type | Test & Boost Your Typing Speed",
     description:
       "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes and real-time WPM tracking.",
-    images: ["/logo.png"],
+    images: ["https://zinxtype.com/logo.png"],
   },
   alternates: {
     canonical: "https://zinxtype.com",
