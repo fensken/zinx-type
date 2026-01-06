@@ -346,10 +346,10 @@ const TypingPractice = () => {
   const lineHeight = 40;
 
   return (
-    <div className="relative w-full mt-32">
+    <div className="relative w-full mt-16 sm:mt-24 md:mt-32">
       {/* Progress indicator */}
       {progressDisplay && !showOverlay && (
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 text-4xl font-mono text-primary">
+        <div className="absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono text-primary">
           {progressDisplay}
         </div>
       )}
@@ -370,7 +370,7 @@ const TypingPractice = () => {
         {/* Words wrapper - scrolls up */}
         <div
           ref={wordsContainerRef}
-          className="flex flex-wrap gap-x-3 gap-y-2 text-2xl font-mono transition-transform duration-100 ease-out"
+          className="flex flex-wrap gap-x-2 sm:gap-x-3 gap-y-2 text-lg sm:text-xl md:text-2xl font-mono transition-transform duration-100 ease-out"
           style={{
             transform: `translateY(-${scrollTop}px)`,
           }}

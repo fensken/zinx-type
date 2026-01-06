@@ -120,47 +120,47 @@ export default function ResultsPage() {
 
   if (!displayStats) {
     return (
-      <main className="my-6 px-6 justify-center flex flex-col items-center max-w-6xl mx-auto">
+      <main className="my-4 md:my-6 px-4 md:px-6 justify-center flex flex-col items-center max-w-6xl mx-auto">
         <div className="text-muted-foreground">Loading...</div>
       </main>
     );
   }
 
   return (
-    <main className="my-6 px-6 justify-center flex flex-col items-center max-w-6xl mx-auto">
+    <main className="my-4 md:my-6 px-4 md:px-6 justify-center flex flex-col items-center max-w-6xl mx-auto">
       <div className="w-full max-w-4xl mx-auto font-mono">
         {/* Main Stats */}
-        <div className="flex items-start justify-center gap-16 mb-12">
+        <div className="flex items-start justify-center gap-8 sm:gap-12 md:gap-16 mb-8 md:mb-12">
           <div className="text-center">
             <div className="text-muted-foreground text-sm mb-1">wpm</div>
-            <div className="text-7xl font-bold text-primary">
+            <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-primary">
               {displayStats.wpm}
             </div>
           </div>
 
           <div className="text-center">
             <div className="text-muted-foreground text-sm mb-1">acc</div>
-            <div className="text-7xl font-bold text-foreground">
+            <div className="text-5xl sm:text-6xl md:text-7xl font-bold text-foreground">
               {displayStats.accuracy}%
             </div>
           </div>
         </div>
 
         {/* Detailed Stats */}
-        <div className="flex items-center justify-center gap-12 text-center mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8 text-center mb-8">
           <div>
             <div className="text-muted-foreground text-xs mb-1">test type</div>
-            <div className="text-lg">{displayMode}</div>
+            <div className="text-base md:text-lg">{displayMode}</div>
           </div>
 
           <div>
             <div className="text-muted-foreground text-xs mb-1">raw</div>
-            <div className="text-lg">{displayStats.rawWpm}</div>
+            <div className="text-base md:text-lg">{displayStats.rawWpm}</div>
           </div>
 
           <div>
             <div className="text-muted-foreground text-xs mb-1">characters</div>
-            <div className="text-lg">
+            <div className="text-base md:text-lg">
               <span className="text-primary">{displayStats.correctChars}</span>
               <span className="text-muted-foreground">/</span>
               <span className="text-destructive">
@@ -175,7 +175,7 @@ export default function ResultsPage() {
 
           <div>
             <div className="text-muted-foreground text-xs mb-1">time</div>
-            <div className="text-lg">{displayStats.time}s</div>
+            <div className="text-base md:text-lg">{displayStats.time}s</div>
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export default function ResultsPage() {
 
         {/* Session History */}
         {previousResults.length > 0 && (
-          <div className="mt-16 border-t border-border pt-8">
+          <div className="mt-10 md:mt-16 border-t border-border pt-6 md:pt-8">
             <h3 className="text-muted-foreground text-sm mb-4 text-center">
               session history
             </h3>
@@ -205,23 +205,23 @@ export default function ResultsPage() {
               {previousResults.map((result) => (
                 <div
                   key={result.id}
-                  className="flex items-center justify-between px-4 py-3 bg-card rounded-lg"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-3 sm:px-4 py-3 bg-card rounded-lg gap-2 sm:gap-0"
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="text-primary font-bold text-xl">
+                  <div className="flex items-center gap-4 sm:gap-6">
+                    <div className="text-primary font-bold text-lg sm:text-xl">
                       {result.wpm}
                       <span className="text-muted-foreground text-xs ml-1">
                         wpm
                       </span>
                     </div>
-                    <div className="text-foreground">
+                    <div className="text-foreground text-sm sm:text-base">
                       {result.accuracy}%
                       <span className="text-muted-foreground text-xs ml-1">
                         acc
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                  <div className="flex items-center gap-3 sm:gap-4 text-muted-foreground text-xs sm:text-sm">
                     <span>{result.mode}</span>
                     <span>{formatTime(result.timestamp)}</span>
                   </div>

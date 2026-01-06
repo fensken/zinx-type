@@ -140,7 +140,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[300px] overflow-y-auto py-2">
+        <div ref={listRef} className="max-h-[250px] sm:max-h-[300px] overflow-y-auto py-2">
           {filteredThemes.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               No themes found.
@@ -187,7 +187,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
             <Palette className="h-3 w-3" />
             <span>{themeOptions.length} themes</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2">
             <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
               ↑↓
             </kbd>

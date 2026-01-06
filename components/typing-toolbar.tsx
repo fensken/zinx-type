@@ -80,7 +80,7 @@ const TypingToolbar = () => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-x-3 gap-y-2 font-mono text-xs flex-wrap">
+    <div className="flex items-center justify-center gap-x-2 sm:gap-x-3 gap-y-2 font-mono text-xs flex-wrap">
       {mode !== "quote" && (
         <>
           <ToggleGroup
@@ -94,18 +94,20 @@ const TypingToolbar = () => {
               aria-label="Toggle punctuation"
               className="data-[pressed]:text-primary"
             >
-              <AtSign className="w-4 h-4" /> punctuation
+              <AtSign className="w-4 h-4" />
+              <span className="hidden sm:inline">punctuation</span>
             </ToggleGroupItem>
             <ToggleGroupItem
               value="numbers"
               aria-label="Toggle numbers"
               className="data-[pressed]:text-primary"
             >
-              <Hash className="w-4 h-4" /> numbers
+              <Hash className="w-4 h-4" />
+              <span className="hidden sm:inline">numbers</span>
             </ToggleGroupItem>
           </ToggleGroup>
 
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
         </>
       )}
 
@@ -119,25 +121,28 @@ const TypingToolbar = () => {
           aria-label="Time mode"
           className="data-[pressed]:text-primary"
         >
-          <Clock className="w-4 h-4" /> time
+          <Clock className="w-4 h-4" />
+          <span className="hidden sm:inline">time</span>
         </ToggleGroupItem>
         <ToggleGroupItem
           value="word"
           aria-label="Word mode"
           className="data-[pressed]:text-primary"
         >
-          <WholeWordIcon className="w-4 h-4" /> word
+          <WholeWordIcon className="w-4 h-4" />
+          <span className="hidden sm:inline">word</span>
         </ToggleGroupItem>
         <ToggleGroupItem
           value="quote"
           aria-label="Quote mode"
           className="data-[pressed]:text-primary"
         >
-          <QuoteIcon className="w-4 h-4" /> quote
+          <QuoteIcon className="w-4 h-4" />
+          <span className="hidden sm:inline">quote</span>
         </ToggleGroupItem>
       </ToggleGroup>
 
-      <Separator orientation="vertical" className="h-6" />
+      <Separator orientation="vertical" className="h-6 hidden sm:block" />
 
       {mode === "time" && (
         <ToggleGroup
@@ -188,21 +193,24 @@ const TypingToolbar = () => {
             aria-label="Easy difficulty"
             className="data-[pressed]:text-emerald-500"
           >
-            <Leaf className="w-4 h-4" /> easy
+            <Leaf className="w-4 h-4" />
+            <span className="hidden sm:inline">easy</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="medium"
             aria-label="Medium difficulty"
             className="data-[pressed]:text-amber-500"
           >
-            <Gauge className="w-4 h-4" /> medium
+            <Gauge className="w-4 h-4" />
+            <span className="hidden sm:inline">medium</span>
           </ToggleGroupItem>
           <ToggleGroupItem
             value="hard"
             aria-label="Hard difficulty"
             className="data-[pressed]:text-destructive"
           >
-            <Flame className="w-4 h-4" /> hard
+            <Flame className="w-4 h-4" />
+            <span className="hidden sm:inline">hard</span>
           </ToggleGroupItem>
         </ToggleGroup>
       )}
