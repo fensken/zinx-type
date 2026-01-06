@@ -166,7 +166,7 @@ const fontVariables = [
 ].join(" ");
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://zinxtype.com"),
+  metadataBase: new URL("https://zinx-type.vercel.app/"),
   title: "Zinx Type | Test & Boost Your Typing Speed",
   description:
     "Improve your typing speed and accuracy with Zinx Type. A minimal typing test with multiple modes, quotes, and real-time WPM tracking. Practice typing and boost your productivity.",
@@ -199,7 +199,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://zinxtype.com",
+    url: "https://zinx-type.vercel.app/",
     siteName: "Zinx Type",
     title: "Zinx Type | Test & Boost Your Typing Speed",
     description:
@@ -218,10 +218,10 @@ export const metadata: Metadata = {
     title: "Zinx Type | Test & Boost Your Typing Speed",
     description:
       "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes and real-time WPM tracking.",
-    images: ["https://zinxtype.com/logo.png"],
+    images: ["https://zinx-type.vercel.app/logo.png"],
   },
   alternates: {
-    canonical: "https://zinxtype.com",
+    canonical: "https://zinx-type.vercel.app/",
   },
   category: "Technology",
 };
