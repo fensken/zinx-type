@@ -166,9 +166,10 @@ const fontVariables = [
 ].join(" ");
 
 export const metadata: Metadata = {
-  title: "Zinx Type - Free Online Typing Test & Practice",
+  metadataBase: new URL("https://zinxtype.com"),
+  title: "Zinx Type | Test & Boost Your Typing Speed",
   description:
-    "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes, quotes, and real-time WPM tracking. Practice typing and boost your productivity.",
+    "Improve your typing speed and accuracy with Zinx Type. A minimal typing test with multiple modes, quotes, and real-time WPM tracking. Practice typing and boost your productivity.",
   keywords: [
     "typing test",
     "typing practice",
@@ -200,15 +201,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://zinxtype.com",
     siteName: "Zinx Type",
-    title: "Zinx Type - Free Online Typing Test & Practice",
+    title: "Zinx Type | Test & Boost Your Typing Speed",
     description:
       "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes, quotes, and real-time WPM tracking.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Zinx Type | Test & Boost Your Typing Speed",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zinx Type - Free Online Typing Test & Practice",
+    title: "Zinx Type | Test & Boost Your Typing Speed",
     description:
       "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes and real-time WPM tracking.",
+    images: ["/logo.png"],
   },
   alternates: {
     canonical: "https://zinxtype.com",
@@ -247,11 +257,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={fontVariables}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
