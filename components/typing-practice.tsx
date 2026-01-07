@@ -44,8 +44,8 @@ const WordDisplay = memo(function WordDisplay({
               char.status === "correct"
                 ? "text-primary"
                 : char.status === "incorrect"
-                ? "text-destructive"
-                : "text-muted-foreground"
+                  ? "text-destructive"
+                  : "text-muted-foreground"
             }`}
           >
             {isCurrentChar && (
@@ -62,7 +62,7 @@ const WordDisplay = memo(function WordDisplay({
         return (
           <span key={`extra-${i}`} className="relative text-destructive/70">
             {isCurrentExtraChar && (
-              <span className="absolute left-0 top-0 w-[2px] h-full bg-caret animate-caret" />
+              <span className="absolute left-0 top-0 w-0.5 h-full bg-caret animate-caret" />
             )}
             {char}
           </span>
@@ -73,7 +73,7 @@ const WordDisplay = memo(function WordDisplay({
       {isActive &&
         activeCharIdx >= word.chars.length + word.extraChars.length && (
           <span className="relative w-0">
-            <span className="absolute left-0 top-0 w-[2px] h-full bg-caret animate-caret" />
+            <span className="absolute left-0 top-0 w-0.5 h-full bg-caret animate-caret" />
           </span>
         )}
     </div>
@@ -86,6 +86,7 @@ const TypingPractice = () => {
   const [quoteSource, setQuoteSource] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const wordsContainerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const wordElementsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -113,7 +114,10 @@ const TypingPractice = () => {
   const difficulty = useSettingsStore((state) => state.difficulty);
   const includeNumbers = useSettingsStore((state) => state.includeNumbers);
   const includePunctuation = useSettingsStore(
-    (state) => state.includePunctuation
+    (state) => state.includePunctuation,
+  );
+  const includeSpecialCharacters = useSettingsStore(
+    (state) => state.includeSpecialCharacters,
   );
 
   const font = useFontStore((state) => state.font);
@@ -136,6 +140,7 @@ const TypingPractice = () => {
         count,
         includeNumbers,
         includePunctuation,
+        includeSpecialCharacters,
       });
       setQuoteSource(null);
       reset(wordList);
@@ -152,6 +157,7 @@ const TypingPractice = () => {
     difficulty,
     includeNumbers,
     includePunctuation,
+    includeSpecialCharacters,
     reset,
   ]);
 
@@ -205,6 +211,7 @@ const TypingPractice = () => {
     difficulty,
     includeNumbers,
     includePunctuation,
+    includeSpecialCharacters,
   ]);
 
   // Reset revealed state when paused
@@ -253,9 +260,14 @@ const TypingPractice = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [testActive, pauseTest]);
 
-  // Global keyboard listener
+  // Auto-focus the container for keyboard events
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    containerRef.current?.focus();
+  }, [revealed, loading]);
+
+  // Keyboard handler for typing
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (loading || endTime) return;
 
       // Tab key to reset
@@ -292,23 +304,21 @@ const TypingPractice = () => {
       if (e.key.length === 1) {
         typeChar(e.key);
       }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    loading,
-    endTime,
-    revealed,
-    paused,
-    startTime,
-    startTimer,
-    resumeTest,
-    space,
-    backspace,
-    typeChar,
-    handleReset,
-  ]);
+    },
+    [
+      loading,
+      endTime,
+      revealed,
+      paused,
+      startTime,
+      startTimer,
+      resumeTest,
+      space,
+      backspace,
+      typeChar,
+      handleReset,
+    ],
+  );
 
   const handleClick = useCallback(() => {
     if (!revealed) {
@@ -316,6 +326,7 @@ const TypingPractice = () => {
     } else if (paused) {
       resumeTest();
     }
+    containerRef.current?.focus();
   }, [revealed, paused, resumeTest]);
 
   const progressDisplay = (() => {
@@ -324,7 +335,7 @@ const TypingPractice = () => {
     if (mode === "time") {
       const remainingSeconds = Math.max(
         0,
-        timeLimit - Math.floor(elapsedTime / 1000)
+        timeLimit - Math.floor(elapsedTime / 1000),
       );
       return `${remainingSeconds}`;
     } else if (mode === "word") {
@@ -349,8 +360,11 @@ const TypingPractice = () => {
 
       {/* Words container - shows 3 lines */}
       <div
+        ref={containerRef}
         onClick={handleClick}
-        className="relative overflow-hidden"
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        className="relative overflow-hidden outline-none"
         style={{ height: `${lineHeight * 3}px` }}
       >
         {/* Blur overlay when not revealed */}
@@ -359,8 +373,8 @@ const TypingPractice = () => {
             {loading
               ? "Loading..."
               : paused
-              ? "Paused! Press any key to continue."
-              : "Click or press any key to start"}
+                ? "Paused! Press any key to continue."
+                : "Click or press any key to start"}
           </div>
         )}
 

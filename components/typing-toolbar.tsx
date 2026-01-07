@@ -9,6 +9,7 @@ import {
   Flame,
   Leaf,
   Gauge,
+  CurlyBraces,
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { Separator } from "./ui/separator";
@@ -25,7 +26,10 @@ const TypingToolbar = () => {
   const difficulty = useSettingsStore((state) => state.difficulty);
   const includeNumbers = useSettingsStore((state) => state.includeNumbers);
   const includePunctuation = useSettingsStore(
-    (state) => state.includePunctuation
+    (state) => state.includePunctuation,
+  );
+  const includeSpecialCharacters = useSettingsStore(
+    (state) => state.includeSpecialCharacters,
   );
 
   const setMode = useSettingsStore((state) => state.setMode);
@@ -33,10 +37,13 @@ const TypingToolbar = () => {
   const setTimeLimit = useSettingsStore((state) => state.setTimeLimit);
   const setDifficulty = useSettingsStore((state) => state.setDifficulty);
   const setIncludeNumbers = useSettingsStore(
-    (state) => state.setIncludeNumbers
+    (state) => state.setIncludeNumbers,
   );
   const setIncludePunctuation = useSettingsStore(
-    (state) => state.setIncludePunctuation
+    (state) => state.setIncludePunctuation,
+  );
+  const setIncludeSpecialCharacters = useSettingsStore(
+    (state) => state.setIncludeSpecialCharacters,
   );
 
   const handleModeChange = (values: readonly string[]) => {
@@ -67,16 +74,18 @@ const TypingToolbar = () => {
     }
   };
 
-  const getPunctuationNumbersValue = (): string[] => {
+  const getTogglesValue = (): string[] => {
     const values: string[] = [];
     if (includePunctuation) values.push("punctuation");
     if (includeNumbers) values.push("numbers");
+    if (includeSpecialCharacters) values.push("special");
     return values;
   };
 
-  const handlePunctuationNumbersChange = (values: readonly string[]) => {
+  const handleTogglesChange = (values: readonly string[]) => {
     setIncludePunctuation(values.includes("punctuation"));
     setIncludeNumbers(values.includes("numbers"));
+    setIncludeSpecialCharacters(values.includes("special"));
   };
 
   return (
@@ -86,8 +95,8 @@ const TypingToolbar = () => {
           <ToggleGroup
             multiple
             variant="outline"
-            value={getPunctuationNumbersValue()}
-            onValueChange={handlePunctuationNumbersChange}
+            value={getTogglesValue()}
+            onValueChange={handleTogglesChange}
           >
             <ToggleGroupItem
               value="punctuation"
@@ -104,6 +113,14 @@ const TypingToolbar = () => {
             >
               <Hash className="w-4 h-4" />
               <span className="hidden sm:inline">numbers</span>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="special"
+              aria-label="Toggle special characters"
+              className="data-[pressed]:text-primary"
+            >
+              <CurlyBraces className="w-4 h-4" />
+              <span className="hidden sm:inline">special</span>
             </ToggleGroupItem>
           </ToggleGroup>
 

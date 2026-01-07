@@ -11,6 +11,7 @@ interface SettingsState {
   difficulty: Difficulty;
   includeNumbers: boolean;
   includePunctuation: boolean;
+  includeSpecialCharacters: boolean;
 }
 
 interface SettingsActions {
@@ -20,6 +21,7 @@ interface SettingsActions {
   setDifficulty: (difficulty: Difficulty) => void;
   setIncludeNumbers: (include: boolean) => void;
   setIncludePunctuation: (include: boolean) => void;
+  setIncludeSpecialCharacters: (include: boolean) => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -31,6 +33,7 @@ const initialState: SettingsState = {
   difficulty: "medium",
   includeNumbers: false,
   includePunctuation: false,
+  includeSpecialCharacters: false,
 };
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -45,6 +48,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setIncludeNumbers: (includeNumbers) => set({ includeNumbers }),
       setIncludePunctuation: (includePunctuation) =>
         set({ includePunctuation }),
+      setIncludeSpecialCharacters: (includeSpecialCharacters) =>
+        set({ includeSpecialCharacters }),
     }),
     {
       name: "zinx-settings",

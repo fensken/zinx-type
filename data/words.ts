@@ -2,6 +2,7 @@ export interface WordGeneratorOptions {
   count: number;
   includeNumbers?: boolean;
   includePunctuation?: boolean;
+  includeSpecialCharacters?: boolean;
 }
 
 // Top 1000 most common English words - curated for typing practice
@@ -810,6 +811,63 @@ const contractions = [
   "they'd",
 ];
 
+// Special characters for typing practice
+const specialCharacters = [
+  "@",
+  "#",
+  "$",
+  "%",
+  "^",
+  "&",
+  "*",
+  "(",
+  ")",
+  "_",
+  "+",
+  "=",
+  "[",
+  "]",
+  "{",
+  "}",
+  "|",
+  "\\",
+  "/",
+  "<",
+  ">",
+  "~",
+  "`",
+];
+
+// Natural phrases with special characters
+const specialCharacterPhrases = [
+  "user@email",
+  "#hashtag",
+  "$100",
+  "50%",
+  "Q&A",
+  "rock&roll",
+  "C++",
+  "node.js",
+  "test_case",
+  "my_variable",
+  "src/index",
+  "path/to/file",
+  "{object}",
+  "[array]",
+  "(group)",
+  "key=value",
+  "a+b",
+  "x*y",
+  "user|admin",
+  "~home",
+  "cmd>output",
+  "input<file",
+  "code`block`",
+  "a^2",
+  "c:\\users",
+  "path\\file",
+];
+
 function shuffle<T>(array: T[]): T[] {
   const result = [...array];
   for (let i = result.length - 1; i > 0; i--) {
@@ -824,7 +882,12 @@ function pick<T>(array: T[]): T {
 }
 
 export function generateWords(options: WordGeneratorOptions): string[] {
-  const { count, includeNumbers = false, includePunctuation = false } = options;
+  const {
+    count,
+    includeNumbers = false,
+    includePunctuation = false,
+    includeSpecialCharacters = false,
+  } = options;
 
   const result: string[] = [];
 
@@ -850,6 +913,13 @@ export function generateWords(options: WordGeneratorOptions): string[] {
           result.push(word);
         }
       }
+      continue;
+    }
+
+    // Occasionally insert special character phrases (about 5% of words when enabled)
+    if (includeSpecialCharacters && Math.random() < 0.05) {
+      const phrase = pick(specialCharacterPhrases);
+      result.push(phrase);
       continue;
     }
 
@@ -879,6 +949,17 @@ export function generateWords(options: WordGeneratorOptions): string[] {
       // Semicolon or colon (rare)
       else if (rand < 0.17) {
         word = word + (Math.random() < 0.5 ? ";" : ":");
+      }
+    }
+
+    // Add special characters to words (about 5% of remaining words when enabled)
+    if (includeSpecialCharacters && Math.random() < 0.05) {
+      const specialChar = pick(specialCharacters);
+      // Randomly prepend or append the special character
+      if (Math.random() < 0.5) {
+        word = specialChar + word;
+      } else {
+        word = word + specialChar;
       }
     }
 
