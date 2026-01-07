@@ -7,7 +7,7 @@ import {
   TrendingUp,
   Flame,
   Target,
-  Calendar,
+  Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTypingStore } from "@/store/typingStore";
@@ -48,9 +48,6 @@ const Results = ({ onRestart }: ResultsProps) => {
   const getAverageWpm = useHistoryStore((state) => state.getAverageWpm);
   const getImprovementPercentage = useHistoryStore(
     (state) => state.getImprovementPercentage,
-  );
-  const getDailyImprovement = useHistoryStore(
-    (state) => state.getDailyImprovement,
   );
 
   const getTestTypeLabel = useCallback(() => {
@@ -140,7 +137,6 @@ const Results = ({ onRestart }: ResultsProps) => {
 
   const averageWpm = getAverageWpm(7);
   const improvement = getImprovementPercentage();
-  const dailyImprovement = getDailyImprovement();
 
   if (!displayStats) {
     return <div className="text-muted-foreground">Loading...</div>;
@@ -225,16 +221,10 @@ const Results = ({ onRestart }: ResultsProps) => {
           </div>
 
           <div className="flex flex-col items-center gap-1">
-            <Calendar
-              className={`w-4 h-4 ${dailyImprovement >= 0 ? "text-emerald-500" : "text-destructive"}`}
-            />
-            <div className="text-xs text-muted-foreground">daily</div>
-            <div
-              className={`text-lg font-bold ${dailyImprovement >= 0 ? "text-emerald-500" : "text-destructive"}`}
-            >
-              {dailyImprovement === 0
-                ? "--"
-                : `${dailyImprovement >= 0 ? "+" : ""}${Math.round(dailyImprovement)}%`}
+            <Hash className="w-4 h-4 text-blue-500" />
+            <div className="text-xs text-muted-foreground">tests</div>
+            <div className="text-lg font-bold text-blue-500">
+              {totalTestsCompleted}
             </div>
           </div>
 
@@ -242,7 +232,7 @@ const Results = ({ onRestart }: ResultsProps) => {
             <TrendingUp
               className={`w-4 h-4 ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
             />
-            <div className="text-xs text-muted-foreground">last 3</div>
+            <div className="text-xs text-muted-foreground">vs last</div>
             <div
               className={`text-lg font-bold ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
             >

@@ -243,19 +243,17 @@ export const useHistoryStore = create<HistoryStore>()(
 
       getImprovementPercentage: () => {
         const results = get().results;
-        if (results.length < 6) return 0;
+        if (results.length < 2) return 0;
 
-        // Compare last 3 tests with previous 3 tests
-        const recent = results.slice(0, 3);
-        const previous = results.slice(3, 6);
+        // Compare last result with previous result
+        const lastResult = results[0];
+        const previousResult = results[1];
 
-        const recentAvg =
-          recent.reduce((sum, r) => sum + r.wpm, 0) / recent.length;
-        const previousAvg =
-          previous.reduce((sum, r) => sum + r.wpm, 0) / previous.length;
-
-        if (previousAvg === 0) return 0;
-        return ((recentAvg - previousAvg) / previousAvg) * 100;
+        if (!lastResult || !previousResult || previousResult.wpm === 0)
+          return 0;
+        return (
+          ((lastResult.wpm - previousResult.wpm) / previousResult.wpm) * 100
+        );
       },
 
       getDailyImprovement: () => {
