@@ -40,7 +40,7 @@ const initialState: SettingsState = {
   difficulty: "medium",
   language: "english",
   codeLanguage: "javascript",
-  customText: "",
+  customText: "The quick brown fox jumps over the lazy dog.",
   includeNumbers: false,
   includePunctuation: false,
   includeSpecialCharacters: false,
