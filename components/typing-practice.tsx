@@ -7,7 +7,7 @@ import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFontStore, fontOptions } from "@/store/fontStore";
 import { useSound } from "@/hooks/useSound";
-import { RotateCcw, AlertTriangle } from "lucide-react";
+import { RotateCcw, AlertTriangle, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CodeTypingBlock from "@/components/code-typing-block";
 import {
@@ -95,6 +95,7 @@ const TypingPractice = () => {
   const [codeCursorPos, setCodeCursorPos] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const wordsContainerRef = useRef<HTMLDivElement>(null);
+  const hiddenInputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const wordElementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const currentLineRef = useRef<number>(0);
@@ -232,12 +233,18 @@ const TypingPractice = () => {
     }
   }, [wordIndex, words.length]);
 
-  // Initialize on mount
+  // Initialize on mount and regenerate when words are reset to empty (external reset)
   /* eslint-disable react-hooks/set-state-in-effect -- Intentional initialization and state sync patterns */
   useEffect(() => {
-    if (words.length === 0) {
+    // When words become empty (from external reset like header click), regenerate test
+    // Skip if we're still in initial loading phase
+    if (words.length === 0 && !loading) {
       generateTest();
     }
+  }, [words.length, loading, generateTest]);
+
+  // Set loading to false on mount
+  useEffect(() => {
     setLoading(false);
   }, []);
 
@@ -306,10 +313,14 @@ const TypingPractice = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [testActive, pauseTest]);
 
-  // Auto-focus the container for keyboard events
+  // Auto-focus the hidden input for keyboard events (including mobile)
+  // Focus on mount and whenever revealed/loading state changes
   useEffect(() => {
-    containerRef.current?.focus();
-  }, [revealed, loading]);
+    if (!loading) {
+      // Always try to focus the input so key presses work
+      hiddenInputRef.current?.focus();
+    }
+  }, [revealed, loading, words.length]);
 
   // Play completion sound when test ends
   useEffect(() => {
@@ -530,10 +541,15 @@ const TypingPractice = () => {
   const handleClick = useCallback(() => {
     if (!revealed) {
       setRevealed(true);
+      // Delay focus slightly to ensure state update happens first
+      setTimeout(() => hiddenInputRef.current?.focus(), 10);
     } else if (paused) {
       resumeTest();
+      hiddenInputRef.current?.focus();
+    } else {
+      // Just focus if already revealed and not paused
+      hiddenInputRef.current?.focus();
     }
-    containerRef.current?.focus();
   }, [revealed, paused, resumeTest]);
 
   const progressDisplay = (() => {
@@ -545,7 +561,7 @@ const TypingPractice = () => {
         timeLimit - Math.floor(elapsedTime / 1000),
       );
       return `${remainingSeconds}`;
-    } else if (mode === "word") {
+    } else if (mode === "word" || mode === "quote") {
       return `${wordIndex}/${words.length}`;
     } else if (mode === "code") {
       const percent =
@@ -573,8 +589,9 @@ const TypingPractice = () => {
       {/* Progress indicator */}
       {progressDisplay && !showOverlay && (
         <div
-          className={`absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono ${paused ? "text-amber-500" : "text-primary"}`}
+          className={`absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono flex items-center gap-2 ${paused ? "text-amber-500" : "text-primary"}`}
         >
+          {paused && <Pause className="w-6 h-6 sm:w-8 sm:h-8" />}
           {progressDisplay}
         </div>
       )}
@@ -621,24 +638,54 @@ const TypingPractice = () => {
                                     ? "scala"
                                     : codeLanguage === "php"
                                       ? "php"
-                                      : codeLanguage}
+                                      : codeLanguage === "liquid"
+                                        ? "liquid"
+                                        : codeLanguage}
             </span>
           </div>
         )}
         <div
           ref={containerRef}
           onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
+          tabIndex={-1}
           className={`relative overflow-hidden outline-none ${mode === "code" ? "p-4" : ""}`}
           style={{
             height: mode === "code" ? "auto" : `${lineHeight * 3}px`,
             maxHeight: mode === "code" ? "400px" : undefined,
           }}
         >
+          {/* Hidden input for mobile keyboard support */}
+          <input
+            ref={hiddenInputRef}
+            type="text"
+            inputMode="text"
+            autoCapitalize="off"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            className="absolute opacity-0 w-0 h-0 pointer-events-none"
+            style={{ position: "absolute", left: "-9999px" }}
+            onKeyDown={handleKeyDown}
+            onBlur={() => {
+              // Re-focus to keep keyboard input working
+              // Don't refocus if user clicked away intentionally (e.g., to settings)
+              setTimeout(() => {
+                const activeElement = document.activeElement;
+                const isInteractiveElement =
+                  activeElement?.tagName === "BUTTON" ||
+                  activeElement?.tagName === "A" ||
+                  activeElement?.tagName === "INPUT" ||
+                  activeElement?.closest('[role="dialog"]');
+                if (!isInteractiveElement) {
+                  hiddenInputRef.current?.focus();
+                }
+              }, 0);
+            }}
+          />
+
           {/* Blur overlay when not revealed */}
           {showOverlay && (
-            <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50 rounded">
+            <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50">
               {loading
                 ? "Loading..."
                 : paused
@@ -690,6 +737,16 @@ const TypingPractice = () => {
         </div>
       )}
 
+      {/* Code mode hints */}
+      {mode === "code" && !showOverlay && (
+        <div className="mt-3 text-xs text-muted-foreground/70 text-center">
+          <span className="text-muted-foreground">space</span> = skip whitespace
+          • <span className="text-muted-foreground">enter</span> = new line (at
+          end of line) • <span className="text-muted-foreground">tab</span> not
+          supported
+        </div>
+      )}
+
       {/* Reset button */}
       <div className="flex flex-col items-center mt-8">
         <Button
@@ -700,8 +757,41 @@ const TypingPractice = () => {
         >
           <RotateCcw size={18} />
         </Button>
-        <p className="mt-2 text-muted-foreground text-xs">
-          <span className="text-primary">ctrl/cmd + enter</span> to restart
+        <p className="mt-2 text-muted-foreground text-sm flex items-center gap-1">
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+            CTRL
+          </kbd>
+          <span>+</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+            ENTER
+          </kbd>
+          /
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+            ⌘
+          </kbd>
+          <span>+</span>
+          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+            ENTER
+          </kbd>
+          <span>to restart</span>
+        </p>
+        <p className="mt-2 text-muted-foreground text-sm flex items-center gap-1">
+          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+            ALT
+          </kbd>
+          <span>+</span>
+          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+            F4
+          </kbd>
+          /
+          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+            ⌘
+          </kbd>
+          <span>+</span>
+          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+            Q
+          </kbd>
+          <span>to boost WPM 😜</span>
         </p>
       </div>
     </div>

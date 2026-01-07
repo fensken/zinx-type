@@ -578,6 +578,99 @@ export const zigSnippets: CodeSnippet[] = [
   },
 ];
 
+export const liquidSnippets: CodeSnippet[] = [
+  {
+    language: "liquid",
+    difficulty: "easy",
+    lines: [
+      "{% if product.available %}",
+      "  <span>{{ product.price | money }}</span>",
+      "{% else %}",
+      "  <span>Sold out</span>",
+      "{% endif %}",
+    ],
+  },
+  {
+    language: "liquid",
+    difficulty: "easy",
+    lines: [
+      "{% for item in cart.items %}",
+      "  <div>{{ item.product.title }}</div>",
+      "  <span>{{ item.quantity }}</span>",
+      "{% endfor %}",
+    ],
+  },
+  {
+    language: "liquid",
+    difficulty: "medium",
+    lines: [
+      "{% assign featured = collections.frontpage.products %}",
+      "{% for product in featured limit: 4 %}",
+      '  <div class="product-card">',
+      "    <img src=\"{{ product.featured_image | img_url: 'medium' }}\">",
+      "    <h3>{{ product.title }}</h3>",
+      "    <p>{{ product.price | money }}</p>",
+      "  </div>",
+      "{% endfor %}",
+    ],
+  },
+  {
+    language: "liquid",
+    difficulty: "medium",
+    lines: [
+      "{% paginate collection.products by 12 %}",
+      "  {% for product in collection.products %}",
+      "    {% render 'product-card', product: product %}",
+      "  {% endfor %}",
+      "  {{ paginate | default_pagination }}",
+      "{% endpaginate %}",
+    ],
+  },
+  {
+    language: "liquid",
+    difficulty: "hard",
+    lines: [
+      "{% schema %}",
+      "{",
+      '  "name": "Featured Collection",',
+      '  "settings": [',
+      "    {",
+      '      "type": "collection",',
+      '      "id": "collection",',
+      '      "label": "Collection"',
+      "    },",
+      "    {",
+      '      "type": "range",',
+      '      "id": "products_to_show",',
+      '      "min": 2,',
+      '      "max": 12,',
+      '      "default": 4,',
+      '      "label": "Products to show"',
+      "    }",
+      "  ]",
+      "}",
+      "{% endschema %}",
+    ],
+  },
+  {
+    language: "liquid",
+    difficulty: "hard",
+    lines: [
+      "{% capture product_form_id %}product-form-{{ section.id }}{% endcapture %}",
+      "{% form 'product', product, id: product_form_id %}",
+      '  <select name="id">',
+      "    {% for variant in product.variants %}",
+      '      <option value="{{ variant.id }}">',
+      "        {{ variant.title }} - {{ variant.price | money }}",
+      "      </option>",
+      "    {% endfor %}",
+      "  </select>",
+      '  <button type="submit">Add to cart</button>',
+      "{% endform %}",
+    ],
+  },
+];
+
 export function getSnippetsByLanguage(language: string): CodeSnippet[] {
   switch (language) {
     case "javascript":
@@ -612,6 +705,8 @@ export function getSnippetsByLanguage(language: string): CodeSnippet[] {
       return luaSnippets;
     case "zig":
       return zigSnippets;
+    case "liquid":
+      return liquidSnippets;
     default:
       return javascriptSnippets;
   }
@@ -641,6 +736,7 @@ function getAllSnippets(): CodeSnippet[] {
     ...scalaSnippets,
     ...luaSnippets,
     ...zigSnippets,
+    ...liquidSnippets,
   ];
 }
 

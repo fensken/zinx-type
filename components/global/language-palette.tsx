@@ -9,10 +9,7 @@ import React, {
 } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSettingsStore } from "@/store/settingsStore";
-import {
-  type NaturalLanguage,
-  naturalLanguageOptions,
-} from "@/data/languages";
+import { type NaturalLanguage, naturalLanguageOptions } from "@/data/languages";
 import { cn } from "@/lib/utils";
 import { Search, Languages } from "lucide-react";
 
@@ -105,7 +102,9 @@ const LanguagePalette = ({ open, onOpenChange }: LanguagePaletteProps) => {
         case "Enter":
           e.preventDefault();
           if (filteredLanguages[selectedIndex]) {
-            handleSelect(filteredLanguages[selectedIndex].id as NaturalLanguage);
+            handleSelect(
+              filteredLanguages[selectedIndex].id as NaturalLanguage,
+            );
           }
           break;
         case "Escape":
@@ -158,7 +157,15 @@ const LanguagePalette = ({ open, onOpenChange }: LanguagePaletteProps) => {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <span className="text-lg">{l.flag}</span>
+                <span
+                  className="text-lg"
+                  style={{
+                    fontFamily:
+                      "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiOne Color', sans-serif",
+                  }}
+                >
+                  {l.flag}
+                </span>
                 <span className="flex-1 text-left">{l.name}</span>
                 {language === l.id && (
                   <span className="text-primary text-xs">active</span>

@@ -29,100 +29,153 @@ function generateKeySound(
 
     switch (pack) {
       case "typewriter": {
-        // Typewriter: classic mechanical click with resonance
+        // Typewriter: classic mechanical click with metallic resonance
         const osc = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
+        const gain2 = ctx.createGain();
         const filter = ctx.createBiquadFilter();
 
         osc.connect(filter);
+        osc2.connect(gain2);
         filter.connect(gain);
         gain.connect(ctx.destination);
+        gain2.connect(ctx.destination);
 
+        // Main clack sound
         osc.type = "square";
         filter.type = "bandpass";
-        filter.frequency.value = isError ? 300 : 2000;
-        filter.Q.value = 5;
+        filter.frequency.value = isError ? 400 : 3000;
+        filter.Q.value = 8;
 
-        osc.frequency.setValueAtTime(isError ? 200 : 800, now);
+        osc.frequency.setValueAtTime(isError ? 180 : 1200, now);
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 100 : 400,
-          now + 0.04,
+          isError ? 90 : 600,
+          now + 0.03,
         );
-        gain.gain.setValueAtTime(volume * 0.25, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain.gain.setValueAtTime(volume * 0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        // Metallic ping resonance
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(isError ? 300 : 4500, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 200 : 3000,
+          now + 0.06,
+        );
+        gain2.gain.setValueAtTime(volume * 0.08, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
         osc.start(now);
-        osc.stop(now + 0.05);
+        osc.stop(now + 0.04);
+        osc2.start(now);
+        osc2.stop(now + 0.08);
         break;
       }
 
       case "mechanical": {
-        // Mechanical: Cherry MX style click
+        // Mechanical: Cherry MX style snappy click
         const osc = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
+        const gain2 = ctx.createGain();
 
         osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.type = "square";
-        osc.frequency.setValueAtTime(isError ? 150 : 1400, now);
-        osc.frequency.exponentialRampToValueAtTime(
-          isError ? 80 : 700,
-          now + 0.025,
-        );
-        gain.gain.setValueAtTime(volume * 0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
-
-        osc.start(now);
-        osc.stop(now + 0.025);
-        break;
-      }
-
-      case "mechanical-heavy": {
-        // Mechanical Heavy: deep thocky sound
-        const osc1 = ctx.createOscillator();
-        const osc2 = ctx.createOscillator();
-        const gain1 = ctx.createGain();
-        const gain2 = ctx.createGain();
-        const filter = ctx.createBiquadFilter();
-
-        osc1.connect(gain1);
         osc2.connect(gain2);
-        gain1.connect(filter);
-        gain2.connect(filter);
-        filter.connect(ctx.destination);
+        gain.connect(ctx.destination);
+        gain2.connect(ctx.destination);
 
-        filter.type = "lowpass";
-        filter.frequency.value = 800;
-
-        osc1.type = "sine";
-        osc1.frequency.setValueAtTime(isError ? 80 : 150, now);
-        osc1.frequency.exponentialRampToValueAtTime(
-          isError ? 40 : 80,
-          now + 0.08,
+        // Sharp click
+        osc.type = "square";
+        osc.frequency.setValueAtTime(isError ? 200 : 2200, now);
+        osc.frequency.exponentialRampToValueAtTime(
+          isError ? 100 : 1100,
+          now + 0.015,
         );
+        gain.gain.setValueAtTime(volume * 0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
 
-        osc2.type = "square";
-        osc2.frequency.setValueAtTime(isError ? 100 : 300, now);
+        // Bottom out thud
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(isError ? 80 : 180, now + 0.01);
         osc2.frequency.exponentialRampToValueAtTime(
-          isError ? 50 : 150,
+          isError ? 40 : 90,
           now + 0.04,
         );
-
-        gain1.gain.setValueAtTime(volume * 0.3, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        gain2.gain.setValueAtTime(volume * 0.15, now);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(volume * 0.15, now + 0.01);
         gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
 
-        osc1.start(now);
-        osc1.stop(now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.02);
         osc2.start(now);
         osc2.stop(now + 0.04);
         break;
       }
 
+      case "mechanical-heavy": {
+        // Mechanical Heavy: deep thocky sound with bass
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const osc3 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const gain3 = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        osc3.connect(gain3);
+        gain1.connect(filter);
+        gain2.connect(filter);
+        gain3.connect(ctx.destination);
+        filter.connect(ctx.destination);
+
+        filter.type = "lowpass";
+        filter.frequency.value = 600;
+
+        // Deep bass thock
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(isError ? 60 : 100, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 30 : 50,
+          now + 0.12,
+        );
+
+        // Mid thud
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(isError ? 80 : 200, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 40 : 100,
+          now + 0.06,
+        );
+
+        // Initial click
+        osc3.type = "square";
+        osc3.frequency.setValueAtTime(isError ? 150 : 800, now);
+        osc3.frequency.exponentialRampToValueAtTime(
+          isError ? 75 : 400,
+          now + 0.02,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.35, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        gain2.gain.setValueAtTime(volume * 0.2, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        gain3.gain.setValueAtTime(volume * 0.12, now);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+        osc1.start(now);
+        osc1.stop(now + 0.12);
+        osc2.start(now);
+        osc2.stop(now + 0.06);
+        osc3.start(now);
+        osc3.stop(now + 0.025);
+        break;
+      }
+
       case "soft": {
-        // Soft: quiet membrane keyboard
+        // Soft: quiet membrane keyboard - muted and gentle
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         const filter = ctx.createBiquadFilter();
@@ -132,89 +185,129 @@ function generateKeySound(
         gain.connect(ctx.destination);
 
         filter.type = "lowpass";
-        filter.frequency.value = 600;
+        filter.frequency.value = 400;
+        filter.Q.value = 0.5;
 
         osc.type = "sine";
-        osc.frequency.setValueAtTime(isError ? 250 : 500, now);
+        osc.frequency.setValueAtTime(isError ? 200 : 350, now);
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 125 : 250,
-          now + 0.06,
+          isError ? 100 : 175,
+          now + 0.08,
         );
-        gain.gain.setValueAtTime(volume * 0.12, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        gain.gain.setValueAtTime(volume * 0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
 
         osc.start(now);
-        osc.stop(now + 0.06);
+        osc.stop(now + 0.08);
         break;
       }
 
       case "pop": {
-        // Pop: satisfying pop sound
+        // Pop: satisfying pop sound - quick attack with resonance
         const osc = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
+        const gain2 = ctx.createGain();
 
         osc.connect(gain);
+        osc2.connect(gain2);
         gain.connect(ctx.destination);
+        gain2.connect(ctx.destination);
 
+        // Main pop
         osc.type = "sine";
-        osc.frequency.setValueAtTime(isError ? 200 : 1200, now);
+        osc.frequency.setValueAtTime(isError ? 300 : 1800, now);
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 100 : 400,
+          isError ? 150 : 600,
+          now + 0.03,
+        );
+        gain.gain.setValueAtTime(volume * 0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        // Sub bass for body
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(isError ? 100 : 250, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 50 : 125,
           now + 0.05,
         );
-        gain.gain.setValueAtTime(volume * 0.22, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain2.gain.setValueAtTime(volume * 0.15, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
         osc.start(now);
-        osc.stop(now + 0.05);
+        osc.stop(now + 0.04);
+        osc2.start(now);
+        osc2.stop(now + 0.05);
         break;
       }
 
       case "bubble": {
-        // Bubble: soft bubble pop
+        // Bubble: soft bubbly water drop sound
         const osc = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
+        const gain2 = ctx.createGain();
 
         osc.connect(gain);
+        osc2.connect(gain2);
         gain.connect(ctx.destination);
+        gain2.connect(ctx.destination);
 
+        // Rising bubble
         osc.type = "sine";
-        osc.frequency.setValueAtTime(isError ? 300 : 800, now);
+        osc.frequency.setValueAtTime(isError ? 400 : 600, now);
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 600 : 1600,
-          now + 0.02,
+          isError ? 800 : 1400,
+          now + 0.04,
         );
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 150 : 400,
-          now + 0.07,
+          isError ? 200 : 500,
+          now + 0.1,
         );
-        gain.gain.setValueAtTime(volume * 0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        gain.gain.setValueAtTime(volume * 0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        // Subtle harmonic
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(isError ? 600 : 900, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 1200 : 2100,
+          now + 0.03,
+        );
+        gain2.gain.setValueAtTime(volume * 0.06, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
         osc.start(now);
-        osc.stop(now + 0.07);
+        osc.stop(now + 0.1);
+        osc2.start(now);
+        osc2.stop(now + 0.05);
         break;
       }
 
       case "click": {
-        // Click: sharp digital click
+        // Click: very short sharp digital click
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
 
-        osc.connect(gain);
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(ctx.destination);
 
+        filter.type = "highpass";
+        filter.frequency.value = 1000;
+
         osc.type = "square";
-        osc.frequency.setValueAtTime(isError ? 200 : 2500, now);
+        osc.frequency.setValueAtTime(isError ? 300 : 4000, now);
         osc.frequency.exponentialRampToValueAtTime(
-          isError ? 100 : 1250,
-          now + 0.015,
+          isError ? 150 : 2000,
+          now + 0.008,
         );
-        gain.gain.setValueAtTime(volume * 0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+        gain.gain.setValueAtTime(volume * 0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.01);
 
         osc.start(now);
-        osc.stop(now + 0.015);
+        osc.stop(now + 0.01);
         break;
       }
 

@@ -30,6 +30,7 @@ function getShikiLanguage(lang: string): BundledLanguage {
     scala: "scala",
     lua: "lua",
     zig: "zig",
+    liquid: "liquid",
   };
   return mapping[lang] || "javascript";
 }
@@ -182,9 +183,9 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
   }
 
   return (
-    <div className="font-mono text-base leading-8 bg-card/50 rounded-lg overflow-hidden border border-border/50">
-      <div className="p-4 overflow-x-auto">
-        <pre className="m-0">
+    <div className="font-mono text-base leading-8 bg-card/50 overflow-hidden">
+      <div className="p-4 overflow-x-auto min-h-full">
+        <pre className="m-0 min-h-full">
           {tokens.map((lineTokens, lineIndex) => {
             const lineStartPos = lineStartPositions[lineIndex] ?? 0;
             const lineText = lines[lineIndex] ?? "";

@@ -28,6 +28,7 @@ import { phpKeywords } from "./php";
 import { swiftKeywords } from "./swift";
 import { kotlinKeywords } from "./kotlin";
 import { scalaKeywords } from "./scala";
+import { liquidKeywords } from "./liquid";
 
 // Natural languages for word/time modes
 export type NaturalLanguage =
@@ -62,7 +63,8 @@ export type CodeLanguage =
   | "php"
   | "swift"
   | "kotlin"
-  | "scala";
+  | "scala"
+  | "liquid";
 
 // Combined type for backwards compatibility
 export type Language = NaturalLanguage | CodeLanguage;
@@ -107,6 +109,7 @@ export const codeLanguageOptions: LanguageOption[] = [
   { id: "swift", name: "Swift", category: "programming" },
   { id: "kotlin", name: "Kotlin", category: "programming" },
   { id: "scala", name: "Scala", category: "programming" },
+  { id: "liquid", name: "Liquid (Shopify)", category: "programming" },
 ];
 
 // Combined for backwards compatibility
@@ -176,6 +179,8 @@ export function getWordsByLanguage(language: Language): string[] {
       return kotlinKeywords;
     case "scala":
       return scalaKeywords;
+    case "liquid":
+      return liquidKeywords;
     default:
       return englishWords;
   }
@@ -224,4 +229,5 @@ export {
   swiftKeywords,
   kotlinKeywords,
   scalaKeywords,
+  liquidKeywords,
 };

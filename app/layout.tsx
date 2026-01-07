@@ -167,12 +167,13 @@ const fontVariables = [
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://zinx-type.vercel.app/"),
-  title: "Zinx Type | Test & Boost Your Typing Speed",
+  title: "Zinx Type | Free Typing Test - Check Your Typing Speed & WPM",
   description:
-    "Improve your typing speed and accuracy with Zinx Type. A minimal typing test with multiple modes, quotes, and real-time WPM tracking. Practice typing and boost your productivity.",
+    "Free online typing test to measure your typing speed and accuracy. Test your WPM with multiple modes: timed tests, word counts, quotes, and code snippets. A modern Monkeytype alternative with customizable themes, sounds, and fonts. Practice touch typing and improve your keyboard skills.",
   keywords: [
     "typing test",
     "typing practice",
+    "typing speed test",
     "WPM test",
     "words per minute",
     "typing speed",
@@ -180,7 +181,19 @@ export const metadata: Metadata = {
     "touch typing",
     "typing game",
     "free typing test",
-    "online typing",
+    "online typing test",
+    "monkeytype",
+    "monkeytype alternative",
+    "typing trainer",
+    "typing tutor",
+    "speed typing",
+    "keyboard typing test",
+    "wpm typing test",
+    "typing accuracy",
+    "learn to type",
+    "improve typing speed",
+    "code typing practice",
+    "programmer typing test",
   ],
   authors: [{ name: "Zinx Type" }],
   creator: "Zinx Type",
@@ -201,24 +214,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://zinx-type.vercel.app/",
     siteName: "Zinx Type",
-    title: "Zinx Type | Test & Boost Your Typing Speed",
+    title: "Zinx Type | Free Typing Test - Check Your Typing Speed & WPM",
     description:
-      "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes, quotes, and real-time WPM tracking.",
+      "Free online typing test to measure your WPM and accuracy. Multiple test modes, customizable themes, and real-time stats. A modern Monkeytype alternative for improving your typing speed.",
     images: [
       {
-        url: "/logo.png",
+        url: "https://zinx-type.vercel.app/logo.png",
         width: 1200,
         height: 630,
-        alt: "Zinx Type | Test & Boost Your Typing Speed",
+        alt: "Zinx Type - Free Online Typing Speed Test",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zinx Type | Test & Boost Your Typing Speed",
+    title: "Zinx Type | Free Typing Test - Check Your Typing Speed & WPM",
     description:
-      "Improve your typing speed and accuracy with Zinx Type. Free online typing test with multiple modes and real-time WPM tracking.",
-    images: ["https://zinx-type.vercel.app/logo.png"],
+      "Free online typing test to measure your WPM and accuracy. Multiple test modes, customizable themes, and real-time stats. A modern Monkeytype alternative.",
+    images: ["https://zinx-type.vercel.app/og-twitter.png"],
   },
   alternates: {
     canonical: "https://zinx-type.vercel.app/",
@@ -261,7 +274,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="antialiased min-h-dvh flex flex-col">
+      <body className="antialiased min-h-screen min-h-[100dvh] flex flex-col supports-[height:100dvh]:min-h-dvh">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

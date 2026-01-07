@@ -108,7 +108,7 @@ const TypingToolbar = () => {
     <div className="flex flex-col items-center gap-3">
       {/* Main toolbar row */}
       <div className="flex items-center justify-center gap-x-2 sm:gap-x-3 gap-y-2 font-mono text-xs flex-wrap">
-        {mode !== "quote" && mode !== "code" && (
+        {mode !== "quote" && mode !== "code" && mode !== "custom" && (
           <>
             <ToggleGroup
               multiple
@@ -234,7 +234,9 @@ const TypingToolbar = () => {
           </>
         )}
 
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        {mode !== "custom" && (
+          <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        )}
 
         {mode === "time" && (
           <ToggleGroup

@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Monitor, HardDrive, Code2 } from "lucide-react";
+import { Github, Monitor, HardDrive } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -15,7 +15,9 @@ const Footer = () => {
         {/* Data storage notice */}
         <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-muted-foreground/60">
           <HardDrive className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
-          <span>Your data stays on this device only — no account needed</span>
+          <span>
+            Your data is stored locally in your browser — No account required
+          </span>
         </div>
 
         {/* Links */}
@@ -28,16 +30,6 @@ const Footer = () => {
           >
             <Github className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span>@fensken</span>
-          </a>
-          <span className="text-muted-foreground/30">|</span>
-          <a
-            href="https://github.com/fensken/zinx-type"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Code2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span>Source Code</span>
           </a>
         </div>
       </div>

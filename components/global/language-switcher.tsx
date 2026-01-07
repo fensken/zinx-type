@@ -41,7 +41,15 @@ const LanguageSwitcher = () => {
         title={currentLanguage?.name || "Language"}
       >
         {currentLanguage?.flag ? (
-          <span className="text-base">{currentLanguage.flag}</span>
+          <span
+            className="text-base"
+            style={{
+              fontFamily:
+                "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Android Emoji', 'EmojiOne Color', sans-serif",
+            }}
+          >
+            {currentLanguage.flag}
+          </span>
         ) : (
           <Languages className="h-4 w-4" />
         )}
