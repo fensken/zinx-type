@@ -219,9 +219,7 @@ export const metadata: Metadata = {
       "Free online typing test to measure your WPM and accuracy. Multiple test modes, customizable themes, and real-time stats. A modern Monkeytype alternative for improving your typing speed.",
     images: [
       {
-        url: "https://zinx-type.vercel.app/logo.png",
-        width: 1200,
-        height: 630,
+        url: "https://zinx-type.vercel.app/og.png",
         alt: "Zinx Type - Free Online Typing Speed Test",
       },
     ],
@@ -231,7 +229,7 @@ export const metadata: Metadata = {
     title: "Zinx Type | Free Typing Test - Check Your Typing Speed & WPM",
     description:
       "Free online typing test to measure your WPM and accuracy. Multiple test modes, customizable themes, and real-time stats. A modern Monkeytype alternative.",
-    images: ["https://zinx-type.vercel.app/og-twitter.png"],
+    images: ["https://zinx-type.vercel.app/og.png"],
   },
   alternates: {
     canonical: "https://zinx-type.vercel.app/",
@@ -274,7 +272,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="antialiased min-h-screen min-h-[100dvh] flex flex-col supports-[height:100dvh]:min-h-dvh">
+      <body className="antialiased min-h-dvh flex flex-col supports-[height:100dvh]:min-h-dvh">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
