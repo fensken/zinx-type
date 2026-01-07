@@ -581,10 +581,14 @@ const TypingPractice = () => {
         {/* Progress/Timer - always visible */}
         <div
           className={`text-xl sm:text-2xl md:text-3xl font-mono flex items-center gap-2 ${
-            !revealed || paused ? "text-amber-500" : "text-primary"
+            !revealed || paused || startTime === null
+              ? "text-amber-500"
+              : "text-primary"
           }`}
         >
-          {(!revealed || paused) && <Pause className="w-5 h-5 sm:w-6 sm:h-6" />}
+          {(!revealed || paused || startTime === null) && (
+            <Pause className="w-5 h-5 sm:w-6 sm:h-6" />
+          )}
           {progressDisplay || "--"}
         </div>
 
