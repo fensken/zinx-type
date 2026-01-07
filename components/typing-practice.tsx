@@ -757,38 +757,38 @@ const TypingPractice = () => {
         >
           <RotateCcw size={18} />
         </Button>
-        <p className="mt-2 text-muted-foreground text-sm flex items-center gap-1">
-          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+        <p className="mt-3 text-muted-foreground text-sm flex items-center gap-1">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             CTRL
           </kbd>
           <span>+</span>
-          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ENTER
           </kbd>
-          /
-          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+          <span className="text-muted-foreground/50">/</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ⌘
           </kbd>
           <span>+</span>
-          <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ENTER
           </kbd>
           <span>to restart</span>
         </p>
-        <p className="mt-2 text-muted-foreground text-sm flex items-center gap-1">
-          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+        <p className="mt-2 text-sm flex text-muted-foreground items-center gap-1">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ALT
           </kbd>
           <span>+</span>
-          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             F4
           </kbd>
-          /
-          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+          <span className="text-muted-foreground/30">/</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ⌘
           </kbd>
           <span>+</span>
-          <kbd className="px-1 py-0.5 rounded border border-border/50 bg-muted/50 font-mono text-[9px]">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             Q
           </kbd>
           <span>to boost WPM 😜</span>
