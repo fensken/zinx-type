@@ -2,11 +2,14 @@
 
 import { generateWords } from "@/data/words";
 import { getRandomQuote } from "@/data/quotes";
+import { getRandomSnippetByDifficulty } from "@/data/code-snippets";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
 import { useFontStore, fontOptions } from "@/store/fontStore";
-import { RotateCcw } from "lucide-react";
+import { useSound } from "@/hooks/useSound";
+import { RotateCcw, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CodeTypingBlock from "@/components/code-typing-block";
 import {
   useEffect,
   useState,
@@ -86,6 +89,10 @@ const TypingPractice = () => {
   const [quoteSource, setQuoteSource] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
+  const [capsLockOn, setCapsLockOn] = useState(false);
+  const [codeText, setCodeText] = useState("");
+  const [codeTypedChars, setCodeTypedChars] = useState("");
+  const [codeCursorPos, setCodeCursorPos] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const wordsContainerRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -112,6 +119,8 @@ const TypingPractice = () => {
   const wordCount = useSettingsStore((state) => state.wordCount);
   const timeLimit = useSettingsStore((state) => state.timeLimit);
   const difficulty = useSettingsStore((state) => state.difficulty);
+  const language = useSettingsStore((state) => state.language);
+  const codeLanguage = useSettingsStore((state) => state.codeLanguage);
   const includeNumbers = useSettingsStore((state) => state.includeNumbers);
   const includePunctuation = useSettingsStore(
     (state) => state.includePunctuation,
@@ -119,10 +128,13 @@ const TypingPractice = () => {
   const includeSpecialCharacters = useSettingsStore(
     (state) => state.includeSpecialCharacters,
   );
+  const customText = useSettingsStore((state) => state.customText);
 
   const font = useFontStore((state) => state.font);
   const fontClassName =
     fontOptions.find((f) => f.value === font)?.className || "font-geist-mono";
+
+  const { playKeyPress, playError, playCompletion } = useSound();
 
   const showOverlay = !revealed;
   const testActive =
@@ -134,10 +146,38 @@ const TypingPractice = () => {
       const quoteWords = quote.text.split(" ");
       setQuoteSource(quote.source);
       reset(quoteWords);
+    } else if (mode === "code") {
+      // Code mode - use real code snippets with Shiki highlighting
+      const snippet = getRandomSnippetByDifficulty(codeLanguage, difficulty);
+      const fullCode = snippet.lines.join("\n");
+      setCodeText(fullCode);
+      setCodeTypedChars("");
+      setCodeCursorPos(0);
+      setQuoteSource(null);
+      reset([]); // Empty words array for code mode
+    } else if (mode === "custom") {
+      // Custom text mode - use user provided text
+      if (customText.trim()) {
+        const customWords = customText.trim().split(/\s+/);
+        setQuoteSource(null);
+        reset(customWords);
+      } else {
+        // Fallback to word mode if no custom text
+        const wordList = generateWords({
+          count: wordCount,
+          language,
+          includeNumbers: false,
+          includePunctuation: false,
+          includeSpecialCharacters: false,
+        });
+        setQuoteSource(null);
+        reset(wordList);
+      }
     } else {
       const count = mode === "time" ? getWordsForTime(timeLimit) : wordCount;
       const wordList = generateWords({
         count,
+        language,
         includeNumbers,
         includePunctuation,
         includeSpecialCharacters,
@@ -155,6 +195,9 @@ const TypingPractice = () => {
     wordCount,
     timeLimit,
     difficulty,
+    language,
+    codeLanguage,
+    customText,
     includeNumbers,
     includePunctuation,
     includeSpecialCharacters,
@@ -190,12 +233,12 @@ const TypingPractice = () => {
   }, [wordIndex, words.length]);
 
   // Initialize on mount
+  /* eslint-disable react-hooks/set-state-in-effect -- Intentional initialization and state sync patterns */
   useEffect(() => {
     if (words.length === 0) {
       generateTest();
     }
     setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Regenerate words when settings change
@@ -203,12 +246,14 @@ const TypingPractice = () => {
     if (!loading) {
       generateTest();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     mode,
     wordCount,
     timeLimit,
     difficulty,
+    language,
+    codeLanguage,
+    customText,
     includeNumbers,
     includePunctuation,
     includeSpecialCharacters,
@@ -220,6 +265,7 @@ const TypingPractice = () => {
       setRevealed(false);
     }
   }, [paused]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Timer for time mode
   useEffect(() => {
@@ -265,13 +311,25 @@ const TypingPractice = () => {
     containerRef.current?.focus();
   }, [revealed, loading]);
 
+  // Play completion sound when test ends
+  useEffect(() => {
+    if (endTime) {
+      playCompletion();
+    }
+  }, [endTime, playCompletion]);
+
   // Keyboard handler for typing
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (loading || endTime) return;
+      // Detect Caps Lock state
+      if (e.getModifierState) {
+        setCapsLockOn(e.getModifierState("CapsLock"));
+      }
 
-      // Tab key to reset
-      if (e.key === "Tab") {
+      if (loading) return;
+
+      // Ctrl+Enter to reset - works anytime, anywhere
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         handleReset();
         return;
@@ -290,18 +348,158 @@ const TypingPractice = () => {
         startTimer();
       }
 
+      // Code mode - character-by-character typing
+      if (mode === "code") {
+        // Check if test is complete
+        if (codeCursorPos >= codeText.length) return;
+
+        if (e.key === "Backspace") {
+          e.preventDefault();
+          if (codeCursorPos > 0) {
+            playKeyPress();
+            setCodeTypedChars((prev) => prev.slice(0, -1));
+            setCodeCursorPos((prev) => prev - 1);
+          }
+          return;
+        }
+
+        // Handle Enter key as newline - skip leading whitespace on next line
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const expectedChar = codeText[codeCursorPos];
+          if (expectedChar === "\n") {
+            playKeyPress();
+
+            // Find how much leading whitespace to skip on the next line
+            let skipCount = 0;
+            let nextPos = codeCursorPos + 1;
+            while (
+              nextPos < codeText.length &&
+              (codeText[nextPos] === " " || codeText[nextPos] === "\t")
+            ) {
+              skipCount++;
+              nextPos++;
+            }
+
+            // Add the newline and whitespace as "typed" (auto-completed)
+            const autoCompleted =
+              "\n" +
+              codeText.substring(
+                codeCursorPos + 1,
+                codeCursorPos + 1 + skipCount,
+              );
+            setCodeTypedChars((prev) => prev + autoCompleted);
+            setCodeCursorPos(codeCursorPos + 1 + skipCount);
+
+            // Check if complete
+            if (codeCursorPos + 1 + skipCount >= codeText.length) {
+              endTest();
+            }
+          } else {
+            playError();
+          }
+          return;
+        }
+
+        // Handle space key - skip whitespace to next word
+        if (e.key === " ") {
+          e.preventDefault();
+          const expectedChar = codeText[codeCursorPos];
+
+          // If at end of line (expecting newline), just error - don't advance
+          if (expectedChar === "\n") {
+            playError();
+            return;
+          }
+
+          // Skip all whitespace (spaces and tabs) until we hit a non-whitespace char or newline
+          let skipCount = 0;
+          let pos = codeCursorPos;
+          while (
+            pos < codeText.length &&
+            (codeText[pos] === " " || codeText[pos] === "\t")
+          ) {
+            skipCount++;
+            pos++;
+          }
+
+          if (skipCount > 0) {
+            playKeyPress();
+            // Auto-complete all the whitespace
+            const skippedChars = codeText.substring(
+              codeCursorPos,
+              codeCursorPos + skipCount,
+            );
+            setCodeTypedChars((prev) => prev + skippedChars);
+            setCodeCursorPos(codeCursorPos + skipCount);
+
+            // Check if complete
+            if (codeCursorPos + skipCount >= codeText.length) {
+              endTest();
+            }
+          } else {
+            // No whitespace to skip, play error
+            playError();
+          }
+          return;
+        }
+
+        // Regular character (not space)
+        if (e.key.length === 1) {
+          e.preventDefault();
+          const expectedChar = codeText[codeCursorPos];
+
+          if (e.key === expectedChar) {
+            playKeyPress();
+          } else {
+            playError();
+          }
+
+          setCodeTypedChars((prev) => prev + e.key);
+          setCodeCursorPos((prev) => prev + 1);
+
+          // Check if complete
+          if (codeCursorPos + 1 >= codeText.length) {
+            endTest();
+          }
+          return;
+        }
+
+        return;
+      }
+
+      // Non-code modes (word-based)
+      if (endTime) return;
+
       if (e.key === " ") {
         e.preventDefault();
+        playKeyPress();
         space();
         return;
       }
 
       if (e.key === "Backspace") {
+        playKeyPress();
         backspace();
         return;
       }
 
       if (e.key.length === 1) {
+        // Check if the character will be correct or incorrect
+        const currentWord = words[wordIndex];
+        if (currentWord) {
+          const isExtraChar = charIndex >= currentWord.chars.length;
+          if (isExtraChar) {
+            playError();
+          } else {
+            const expected = currentWord.chars[charIndex].value;
+            if (e.key === expected) {
+              playKeyPress();
+            } else {
+              playError();
+            }
+          }
+        }
         typeChar(e.key);
       }
     },
@@ -317,6 +515,15 @@ const TypingPractice = () => {
       backspace,
       typeChar,
       handleReset,
+      words,
+      wordIndex,
+      charIndex,
+      playKeyPress,
+      playError,
+      mode,
+      codeText,
+      codeCursorPos,
+      endTest,
     ],
   );
 
@@ -340,6 +547,12 @@ const TypingPractice = () => {
       return `${remainingSeconds}`;
     } else if (mode === "word") {
       return `${wordIndex}/${words.length}`;
+    } else if (mode === "code") {
+      const percent =
+        codeText.length > 0
+          ? Math.round((codeCursorPos / codeText.length) * 100)
+          : 0;
+      return `${percent}%`;
     }
     return null;
   })();
@@ -349,6 +562,14 @@ const TypingPractice = () => {
 
   return (
     <div className="relative w-full mt-16 sm:mt-24 md:mt-32">
+      {/* Caps Lock Warning */}
+      {capsLockOn && (
+        <div className="absolute -top-20 sm:-top-24 md:-top-28 left-1/2 -translate-x-1/2 flex items-center gap-2 text-amber-500 text-sm font-mono animate-pulse">
+          <AlertTriangle className="w-4 h-4" />
+          <span>Caps Lock is ON</span>
+        </div>
+      )}
+
       {/* Progress indicator */}
       {progressDisplay && !showOverlay && (
         <div
@@ -360,46 +581,105 @@ const TypingPractice = () => {
 
       {/* Words container - shows 3 lines */}
       <div
-        ref={containerRef}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
-        className="relative overflow-hidden outline-none"
-        style={{ height: `${lineHeight * 3}px` }}
+        className={
+          mode === "code"
+            ? "rounded-lg border border-border bg-card overflow-hidden"
+            : ""
+        }
       >
-        {/* Blur overlay when not revealed */}
-        {showOverlay && (
-          <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50">
-            {loading
-              ? "Loading..."
-              : paused
-                ? "Paused! Press any key to continue."
-                : "Click or press any key to start"}
+        {/* Code editor header */}
+        {mode === "code" && (
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-muted/30">
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500/80" />
+              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
+              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+            </div>
+            <span className="text-xs text-muted-foreground ml-2 font-mono">
+              code.
+              {codeLanguage === "typescript"
+                ? "ts"
+                : codeLanguage === "javascript"
+                  ? "js"
+                  : codeLanguage === "python"
+                    ? "py"
+                    : codeLanguage === "rust"
+                      ? "rs"
+                      : codeLanguage === "golang"
+                        ? "go"
+                        : codeLanguage === "csharp"
+                          ? "cs"
+                          : codeLanguage === "cpp"
+                            ? "cpp"
+                            : codeLanguage === "ruby"
+                              ? "rb"
+                              : codeLanguage === "swift"
+                                ? "swift"
+                                : codeLanguage === "kotlin"
+                                  ? "kt"
+                                  : codeLanguage === "scala"
+                                    ? "scala"
+                                    : codeLanguage === "php"
+                                      ? "php"
+                                      : codeLanguage}
+            </span>
           </div>
         )}
-
-        {/* Words wrapper - scrolls up */}
         <div
-          ref={wordsContainerRef}
-          className={`flex flex-wrap gap-x-2 sm:gap-x-3 font-medium gap-y-2 text-lg sm:text-xl md:text-2xl ${fontClassName} transition-transform duration-100 ease-out`}
+          ref={containerRef}
+          onClick={handleClick}
+          onKeyDown={handleKeyDown}
+          tabIndex={0}
+          className={`relative overflow-hidden outline-none ${mode === "code" ? "p-4" : ""}`}
           style={{
-            transform: `translateY(-${scrollTop}px)`,
+            height: mode === "code" ? "auto" : `${lineHeight * 3}px`,
+            maxHeight: mode === "code" ? "400px" : undefined,
           }}
         >
-          {words.map((word, wi) => (
+          {/* Blur overlay when not revealed */}
+          {showOverlay && (
+            <div className="absolute inset-0 z-10 flex items-center font-bold text-xl text-shadow-2xs justify-center text-muted-foreground backdrop-blur-[2px] bg-background/50 rounded">
+              {loading
+                ? "Loading..."
+                : paused
+                  ? "Paused! Press any key to continue."
+                  : "Click or press any key to start"}
+            </div>
+          )}
+
+          {/* Code mode - IDE-like display with Shiki */}
+          {mode === "code" ? (
+            <CodeTypingBlock
+              code={codeText}
+              language={codeLanguage}
+              typedChars={codeTypedChars}
+              cursorPosition={codeCursorPos}
+            />
+          ) : (
+            /* Words wrapper - scrolls up */
             <div
-              key={wi}
-              ref={(el) => {
-                wordElementsRef.current[wi] = el;
+              ref={wordsContainerRef}
+              className={`flex flex-wrap gap-x-2 sm:gap-x-3 font-medium gap-y-2 text-lg sm:text-xl md:text-2xl ${fontClassName} transition-transform duration-100 ease-out`}
+              style={{
+                transform: `translateY(-${scrollTop}px)`,
               }}
             >
-              <WordDisplay
-                word={word}
-                isActive={wi === wordIndex}
-                activeCharIdx={charIndex}
-              />
+              {words.map((word, wi) => (
+                <div
+                  key={wi}
+                  ref={(el) => {
+                    wordElementsRef.current[wi] = el;
+                  }}
+                >
+                  <WordDisplay
+                    word={word}
+                    isActive={wi === wordIndex}
+                    activeCharIdx={charIndex}
+                  />
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </div>
 
@@ -421,7 +701,7 @@ const TypingPractice = () => {
           <RotateCcw size={18} />
         </Button>
         <p className="mt-2 text-muted-foreground text-xs">
-          <span className="text-primary">tab</span> to restart
+          <span className="text-primary">ctrl/cmd + enter</span> to restart
         </p>
       </div>
     </div>

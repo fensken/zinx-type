@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useCallback } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Trophy, TrendingUp, Flame, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -27,9 +27,20 @@ const Results = ({ onRestart }: ResultsProps) => {
   const wordCount = useSettingsStore((state) => state.wordCount);
   const timeLimit = useSettingsStore((state) => state.timeLimit);
   const difficulty = useSettingsStore((state) => state.difficulty);
+  const language = useSettingsStore((state) => state.language);
 
   const results = useHistoryStore((state) => state.results);
   const addResult = useHistoryStore((state) => state.addResult);
+  const personalBests = useHistoryStore((state) => state.personalBests);
+  const totalTestsCompleted = useHistoryStore(
+    (state) => state.totalTestsCompleted,
+  );
+  const overallBestWpm = useHistoryStore((state) => state.overallBestWpm);
+  const currentStreak = useHistoryStore((state) => state.currentStreak);
+  const getAverageWpm = useHistoryStore((state) => state.getAverageWpm);
+  const getImprovementPercentage = useHistoryStore(
+    (state) => state.getImprovementPercentage,
+  );
 
   const getTestTypeLabel = useCallback(() => {
     if (mode === "quote") {
@@ -79,21 +90,27 @@ const Results = ({ onRestart }: ResultsProps) => {
     };
   }, [words, startTime, endTime]);
 
+  const modeKey = getTestTypeLabel();
+  const personalBest = personalBests[modeKey];
+  const isNewPersonalBest =
+    stats && personalBest && stats.wpm >= personalBest.wpm;
+
   // Save result to history on mount (only once)
   useEffect(() => {
     if (!hasSavedResult.current && stats && stats.wpm > 0) {
       addResult({
         ...stats,
         mode: getTestTypeLabel(),
+        language,
       });
       hasSavedResult.current = true;
     }
-  }, [stats, addResult, getTestTypeLabel]);
+  }, [stats, addResult, getTestTypeLabel, language]);
 
-  // Tab to restart
+  // Ctrl+Enter to restart
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Tab") {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         onRestart();
       }
@@ -106,16 +123,26 @@ const Results = ({ onRestart }: ResultsProps) => {
   // Show the most recent result from history if stats not available
   const displayStats = stats || results[0];
   const displayMode = stats ? getTestTypeLabel() : results[0]?.mode || "";
-  const previousResults = stats ? results.slice(1) : results.slice(1);
+  const previousResults = stats ? results.slice(0, 5) : results.slice(1, 6);
+
+  const averageWpm = getAverageWpm(7);
+  const improvement = getImprovementPercentage();
 
   if (!displayStats) {
-    return (
-      <div className="text-muted-foreground">Loading...</div>
-    );
+    return <div className="text-muted-foreground">Loading...</div>;
   }
 
   return (
     <div className="w-full max-w-4xl mx-auto font-mono">
+      {/* New Personal Best Badge */}
+      {isNewPersonalBest && (
+        <div className="flex items-center justify-center gap-2 mb-4 text-amber-500">
+          <Trophy className="w-5 h-5" />
+          <span className="text-sm font-bold">New Personal Best!</span>
+          <Trophy className="w-5 h-5" />
+        </div>
+      )}
+
       {/* Main Stats */}
       <div className="flex items-start justify-center gap-8 sm:gap-12 md:gap-16 mb-8 md:mb-12 mt-8 md:mt-16">
         <div className="text-center">
@@ -166,6 +193,59 @@ const Results = ({ onRestart }: ResultsProps) => {
         </div>
       </div>
 
+      {/* Personal Stats Summary */}
+      {totalTestsCompleted > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center mb-8 p-4 bg-card rounded-lg">
+          <div className="flex flex-col items-center gap-1">
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <div className="text-xs text-muted-foreground">best wpm</div>
+            <div className="text-lg font-bold text-amber-500">
+              {overallBestWpm}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Target className="w-4 h-4 text-primary" />
+            <div className="text-xs text-muted-foreground">avg (7d)</div>
+            <div className="text-lg font-bold">{Math.round(averageWpm)}</div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <TrendingUp
+              className={`w-4 h-4 ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
+            />
+            <div className="text-xs text-muted-foreground">improvement</div>
+            <div
+              className={`text-lg font-bold ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
+            >
+              {improvement >= 0 ? "+" : ""}
+              {Math.round(improvement)}%
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
+            <Flame
+              className={`w-4 h-4 ${currentStreak > 0 ? "text-orange-500" : "text-muted-foreground"}`}
+            />
+            <div className="text-xs text-muted-foreground">streak</div>
+            <div
+              className={`text-lg font-bold ${currentStreak > 0 ? "text-orange-500" : ""}`}
+            >
+              {currentStreak} day{currentStreak !== 1 ? "s" : ""}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Personal Best for Current Mode */}
+      {personalBest && !isNewPersonalBest && (
+        <div className="text-center mb-6 text-sm text-muted-foreground">
+          Personal best for {modeKey}:{" "}
+          <span className="text-amber-500 font-bold">{personalBest.wpm}</span>{" "}
+          wpm
+        </div>
+      )}
+
       {/* Restart */}
       <div className="flex justify-center mt-8">
         <Button
@@ -179,14 +259,14 @@ const Results = ({ onRestart }: ResultsProps) => {
       </div>
 
       <p className="mt-4 text-center text-muted-foreground text-sm">
-        press <span className="text-primary">tab</span> to restart
+        press <span className="text-primary">ctrl/cmd + enter</span> to restart
       </p>
 
       {/* Session History */}
       {previousResults.length > 0 && (
         <div className="mt-10 md:mt-16 border-t border-border pt-6 md:pt-8">
           <h3 className="text-muted-foreground text-sm mb-4 text-center">
-            session history
+            recent history ({totalTestsCompleted} tests completed)
           </h3>
           <div className="space-y-3">
             {previousResults.map((result) => (
@@ -210,6 +290,9 @@ const Results = ({ onRestart }: ResultsProps) => {
                 </div>
                 <div className="flex items-center gap-3 sm:gap-4 text-muted-foreground text-xs sm:text-sm">
                   <span>{result.mode}</span>
+                  {result.language && result.language !== "english" && (
+                    <span className="text-primary">{result.language}</span>
+                  )}
                   <span>{formatTime(result.timestamp)}</span>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   AtSign,
   Clock,
@@ -10,13 +11,23 @@ import {
   Leaf,
   Gauge,
   CurlyBraces,
+  Code2,
+  ChevronDown,
+  FileText,
+  Pencil,
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
 import { Separator } from "./ui/separator";
+import { Button } from "./ui/button";
 import { useSettingsStore, TestMode } from "@/store/settingsStore";
 import { Difficulty } from "@/data/quotes";
+import { codeLanguageOptions } from "@/data/languages";
+import CodeLanguagePalette from "./global/code-language-palette";
+import { CustomTextModal } from "./custom-text-modal";
 
 const TypingToolbar = () => {
+  const [codeLanguageOpen, setCodeLanguageOpen] = useState(false);
+  const [customTextOpen, setCustomTextOpen] = useState(false);
   const timeOptions = [15, 30, 60, 120, 180];
   const wordOptions = [10, 25, 50, 100, 150];
 
@@ -24,6 +35,7 @@ const TypingToolbar = () => {
   const wordCount = useSettingsStore((state) => state.wordCount);
   const timeLimit = useSettingsStore((state) => state.timeLimit);
   const difficulty = useSettingsStore((state) => state.difficulty);
+  const codeLanguage = useSettingsStore((state) => state.codeLanguage);
   const includeNumbers = useSettingsStore((state) => state.includeNumbers);
   const includePunctuation = useSettingsStore(
     (state) => state.includePunctuation,
@@ -74,6 +86,10 @@ const TypingToolbar = () => {
     }
   };
 
+  const currentCodeLanguage = codeLanguageOptions.find(
+    (l) => l.id === codeLanguage,
+  );
+
   const getTogglesValue = (): string[] => {
     const values: string[] = [];
     if (includePunctuation) values.push("punctuation");
@@ -89,148 +105,208 @@ const TypingToolbar = () => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-x-2 sm:gap-x-3 gap-y-2 font-mono text-xs flex-wrap">
-      {mode !== "quote" && (
-        <>
+    <div className="flex flex-col items-center gap-3">
+      {/* Main toolbar row */}
+      <div className="flex items-center justify-center gap-x-2 sm:gap-x-3 gap-y-2 font-mono text-xs flex-wrap">
+        {mode !== "quote" && mode !== "code" && (
+          <>
+            <ToggleGroup
+              multiple
+              variant="outline"
+              value={getTogglesValue()}
+              onValueChange={handleTogglesChange}
+            >
+              <ToggleGroupItem
+                value="punctuation"
+                aria-label="Toggle punctuation"
+                className="data-[pressed]:text-primary"
+              >
+                <AtSign className="w-4 h-4" />
+                <span className="hidden sm:inline">punctuation</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="numbers"
+                aria-label="Toggle numbers"
+                className="data-[pressed]:text-primary"
+              >
+                <Hash className="w-4 h-4" />
+                <span className="hidden sm:inline">numbers</span>
+              </ToggleGroupItem>
+              <ToggleGroupItem
+                value="special"
+                aria-label="Toggle special characters"
+                className="data-[pressed]:text-primary"
+              >
+                <CurlyBraces className="w-4 h-4" />
+                <span className="hidden sm:inline">special</span>
+              </ToggleGroupItem>
+            </ToggleGroup>
+
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+          </>
+        )}
+
+        <ToggleGroup
+          variant="outline"
+          value={[mode]}
+          onValueChange={handleModeChange}
+        >
+          <ToggleGroupItem
+            value="time"
+            aria-label="Time mode"
+            className="data-[pressed]:text-primary"
+          >
+            <Clock className="w-4 h-4" />
+            <span className="hidden sm:inline">time</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="word"
+            aria-label="Word mode"
+            className="data-[pressed]:text-primary"
+          >
+            <WholeWordIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">word</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="quote"
+            aria-label="Quote mode"
+            className="data-[pressed]:text-primary"
+          >
+            <QuoteIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">quote</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="code"
+            aria-label="Code mode"
+            className="data-[pressed]:text-primary"
+          >
+            <Code2 className="w-4 h-4" />
+            <span className="hidden sm:inline">code</span>
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="custom"
+            aria-label="Custom text mode"
+            className="data-[pressed]:text-primary"
+          >
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">custom</span>
+          </ToggleGroupItem>
+        </ToggleGroup>
+
+        {/* Code language selector dropdown - shown when code mode is selected */}
+        {mode === "code" && (
+          <>
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCodeLanguageOpen(true)}
+              className="gap-1 font-mono text-xs h-8"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span>{currentCodeLanguage?.name || "JavaScript"}</span>
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </Button>
+            <CodeLanguagePalette
+              open={codeLanguageOpen}
+              onOpenChange={setCodeLanguageOpen}
+            />
+          </>
+        )}
+
+        {/* Custom text edit button - shown when custom mode is selected */}
+        {mode === "custom" && (
+          <>
+            <Separator orientation="vertical" className="h-6 hidden sm:block" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCustomTextOpen(true)}
+              className="gap-1 font-mono text-xs h-8"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+              <span>Edit Text</span>
+            </Button>
+            <CustomTextModal
+              open={customTextOpen}
+              onOpenChange={setCustomTextOpen}
+            />
+          </>
+        )}
+
+        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+
+        {mode === "time" && (
           <ToggleGroup
-            multiple
             variant="outline"
-            value={getTogglesValue()}
-            onValueChange={handleTogglesChange}
+            value={[timeLimit.toString()]}
+            onValueChange={handleTimeChange}
+          >
+            {timeOptions.map((option) => (
+              <ToggleGroupItem
+                key={option}
+                value={option.toString()}
+                aria-label={`${option} seconds`}
+                className="data-[pressed]:text-primary"
+              >
+                {option}s
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        )}
+
+        {mode === "word" && (
+          <ToggleGroup
+            variant="outline"
+            value={[wordCount.toString()]}
+            onValueChange={handleWordCountChange}
+          >
+            {wordOptions.map((option) => (
+              <ToggleGroupItem
+                key={option}
+                value={option.toString()}
+                aria-label={`${option} words`}
+                className="data-[pressed]:text-primary"
+              >
+                {option}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        )}
+
+        {(mode === "quote" || mode === "code") && (
+          <ToggleGroup
+            variant="outline"
+            value={[difficulty]}
+            onValueChange={handleDifficultyChange}
           >
             <ToggleGroupItem
-              value="punctuation"
-              aria-label="Toggle punctuation"
-              className="data-[pressed]:text-primary"
+              value="easy"
+              aria-label="Easy difficulty"
+              className="data-[pressed]:text-emerald-500"
             >
-              <AtSign className="w-4 h-4" />
-              <span className="hidden sm:inline">punctuation</span>
+              <Leaf className="w-4 h-4" />
+              <span className="hidden sm:inline">easy</span>
             </ToggleGroupItem>
             <ToggleGroupItem
-              value="numbers"
-              aria-label="Toggle numbers"
-              className="data-[pressed]:text-primary"
+              value="medium"
+              aria-label="Medium difficulty"
+              className="data-[pressed]:text-amber-500"
             >
-              <Hash className="w-4 h-4" />
-              <span className="hidden sm:inline">numbers</span>
+              <Gauge className="w-4 h-4" />
+              <span className="hidden sm:inline">medium</span>
             </ToggleGroupItem>
             <ToggleGroupItem
-              value="special"
-              aria-label="Toggle special characters"
-              className="data-[pressed]:text-primary"
+              value="hard"
+              aria-label="Hard difficulty"
+              className="data-[pressed]:text-destructive"
             >
-              <CurlyBraces className="w-4 h-4" />
-              <span className="hidden sm:inline">special</span>
+              <Flame className="w-4 h-4" />
+              <span className="hidden sm:inline">hard</span>
             </ToggleGroupItem>
           </ToggleGroup>
-
-          <Separator orientation="vertical" className="h-6 hidden sm:block" />
-        </>
-      )}
-
-      <ToggleGroup
-        variant="outline"
-        value={[mode]}
-        onValueChange={handleModeChange}
-      >
-        <ToggleGroupItem
-          value="time"
-          aria-label="Time mode"
-          className="data-[pressed]:text-primary"
-        >
-          <Clock className="w-4 h-4" />
-          <span className="hidden sm:inline">time</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="word"
-          aria-label="Word mode"
-          className="data-[pressed]:text-primary"
-        >
-          <WholeWordIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">word</span>
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="quote"
-          aria-label="Quote mode"
-          className="data-[pressed]:text-primary"
-        >
-          <QuoteIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">quote</span>
-        </ToggleGroupItem>
-      </ToggleGroup>
-
-      <Separator orientation="vertical" className="h-6 hidden sm:block" />
-
-      {mode === "time" && (
-        <ToggleGroup
-          variant="outline"
-          value={[timeLimit.toString()]}
-          onValueChange={handleTimeChange}
-        >
-          {timeOptions.map((option) => (
-            <ToggleGroupItem
-              key={option}
-              value={option.toString()}
-              aria-label={`${option} seconds`}
-              className="data-[pressed]:text-primary"
-            >
-              {option}s
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      )}
-
-      {mode === "word" && (
-        <ToggleGroup
-          variant="outline"
-          value={[wordCount.toString()]}
-          onValueChange={handleWordCountChange}
-        >
-          {wordOptions.map((option) => (
-            <ToggleGroupItem
-              key={option}
-              value={option.toString()}
-              aria-label={`${option} words`}
-              className="data-[pressed]:text-primary"
-            >
-              {option}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      )}
-
-      {mode === "quote" && (
-        <ToggleGroup
-          variant="outline"
-          value={[difficulty]}
-          onValueChange={handleDifficultyChange}
-        >
-          <ToggleGroupItem
-            value="easy"
-            aria-label="Easy difficulty"
-            className="data-[pressed]:text-emerald-500"
-          >
-            <Leaf className="w-4 h-4" />
-            <span className="hidden sm:inline">easy</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="medium"
-            aria-label="Medium difficulty"
-            className="data-[pressed]:text-amber-500"
-          >
-            <Gauge className="w-4 h-4" />
-            <span className="hidden sm:inline">medium</span>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="hard"
-            aria-label="Hard difficulty"
-            className="data-[pressed]:text-destructive"
-          >
-            <Flame className="w-4 h-4" />
-            <span className="hidden sm:inline">hard</span>
-          </ToggleGroupItem>
-        </ToggleGroup>
-      )}
+        )}
+      </div>
     </div>
   );
 };

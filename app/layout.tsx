@@ -261,7 +261,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="antialiased relative min-h-dvh">
+      <body className="antialiased min-h-dvh flex flex-col">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
@@ -270,7 +270,7 @@ export default function RootLayout({
           storageKey="zinx-base-theme"
         >
           <Header />
-          {children}
+          <div className="flex-1">{children}</div>
           <Footer />
         </ThemeProvider>
       </body>

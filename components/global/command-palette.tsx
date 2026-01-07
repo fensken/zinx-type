@@ -26,6 +26,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const prevOpenRef = useRef(open);
 
   const filteredThemes = useMemo(
     () =>
@@ -70,20 +71,36 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
     [setTheme, applyTheme, onOpenChange],
   );
 
-  // Reset state when dialog opens
+  // Reset state when dialog opens and focus input
   useEffect(() => {
-    if (open) {
-      setSearch("");
-      setSelectedIndex(0);
+    if (open && !prevOpenRef.current) {
+      // Dialog just opened - focus input
       const timer = setTimeout(() => inputRef.current?.focus(), 0);
       return () => clearTimeout(timer);
     }
+    prevOpenRef.current = open;
   }, [open]);
 
-  // Reset selectedIndex when search changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [search]);
+  // Handle open change with state reset
+  const handleOpenChange = useCallback(
+    (newOpen: boolean) => {
+      if (newOpen) {
+        setSearch("");
+        setSelectedIndex(0);
+      }
+      onOpenChange(newOpen);
+    },
+    [onOpenChange],
+  );
+
+  // Reset selectedIndex when search changes - handled in onChange
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+      setSelectedIndex(0);
+    },
+    [],
+  );
 
   // Scroll selected item into view
   useEffect(() => {
@@ -122,7 +139,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="p-0 overflow-hidden max-w-md">
         <div className="flex items-center border-b border-border px-3">
           <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -131,7 +148,7 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
             type="text"
             placeholder="Search themes..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent py-3 px-2 text-sm outline-none placeholder:text-muted-foreground"
           />
@@ -140,7 +157,10 @@ const CommandPalette = ({ open, onOpenChange }: CommandPaletteProps) => {
           </kbd>
         </div>
 
-        <div ref={listRef} className="max-h-[250px] sm:max-h-[300px] overflow-y-auto py-2">
+        <div
+          ref={listRef}
+          className="max-h-[250px] sm:max-h-[300px] overflow-y-auto py-2"
+        >
           {filteredThemes.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
               No themes found.

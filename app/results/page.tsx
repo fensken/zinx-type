@@ -103,7 +103,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Tab") {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         handleRestart();
       }
@@ -192,14 +192,16 @@ export default function ResultsPage() {
         </div>
 
         <p className="mt-4 text-center text-muted-foreground text-sm">
-          press <span className="text-primary">tab</span> to restart
+          press <span className="text-primary">ctrl/cmd + enter</span> to
+          restart
         </p>
 
-        {/* Session History */}
+        {/* Recent Tests (Local Storage) */}
         {previousResults.length > 0 && (
           <div className="mt-10 md:mt-16 border-t border-border pt-6 md:pt-8">
             <h3 className="text-muted-foreground text-sm mb-4 text-center">
-              session history
+              recent tests{" "}
+              <span className="text-muted-foreground/50">(saved locally)</span>
             </h3>
             <div className="space-y-3">
               {previousResults.map((result) => (

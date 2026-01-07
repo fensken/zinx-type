@@ -8,45 +8,48 @@ import React, {
   useMemo,
 } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useFontStore, fontOptions, FontName } from "@/store/fontStore";
+import { useSettingsStore } from "@/store/settingsStore";
+import {
+  type NaturalLanguage,
+  naturalLanguageOptions,
+} from "@/data/languages";
 import { cn } from "@/lib/utils";
-import { Search, Type } from "lucide-react";
+import { Search, Languages } from "lucide-react";
 
-interface FontPaletteProps {
+interface LanguagePaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
-  const font = useFontStore((state) => state.font);
-  const setFont = useFontStore((state) => state.setFont);
+const LanguagePalette = ({ open, onOpenChange }: LanguagePaletteProps) => {
+  const language = useSettingsStore((state) => state.language);
+  const setLanguage = useSettingsStore((state) => state.setLanguage);
   const [search, setSearch] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const prevOpenRef = useRef(open);
 
-  const filteredFonts = useMemo(
+  const filteredLanguages = useMemo(
     () =>
-      fontOptions.filter((f) =>
-        f.label.toLowerCase().includes(search.toLowerCase()),
+      naturalLanguageOptions.filter((l) =>
+        l.name.toLowerCase().includes(search.toLowerCase()),
       ),
     [search],
   );
 
   const handleSelect = useCallback(
-    (fontName: FontName) => {
-      setFont(fontName);
+    (langId: NaturalLanguage) => {
+      setLanguage(langId);
       onOpenChange(false);
       setSearch("");
     },
-    [setFont, onOpenChange],
+    [setLanguage, onOpenChange],
   );
 
   // Reset state when dialog opens and focus input
   useEffect(() => {
     if (open && !prevOpenRef.current) {
-      // Dialog just opened - focus input
       const timer = setTimeout(() => inputRef.current?.focus(), 0);
       return () => clearTimeout(timer);
     }
@@ -65,7 +68,7 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
     [onOpenChange],
   );
 
-  // Reset selectedIndex when search changes - handled in onChange
+  // Reset selectedIndex when search changes
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearch(e.target.value);
@@ -89,16 +92,20 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
-          setSelectedIndex((i) => (i < filteredFonts.length - 1 ? i + 1 : 0));
+          setSelectedIndex((i) =>
+            i < filteredLanguages.length - 1 ? i + 1 : 0,
+          );
           break;
         case "ArrowUp":
           e.preventDefault();
-          setSelectedIndex((i) => (i > 0 ? i - 1 : filteredFonts.length - 1));
+          setSelectedIndex((i) =>
+            i > 0 ? i - 1 : filteredLanguages.length - 1,
+          );
           break;
         case "Enter":
           e.preventDefault();
-          if (filteredFonts[selectedIndex]) {
-            handleSelect(filteredFonts[selectedIndex].value);
+          if (filteredLanguages[selectedIndex]) {
+            handleSelect(filteredLanguages[selectedIndex].id as NaturalLanguage);
           }
           break;
         case "Escape":
@@ -107,7 +114,7 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
           break;
       }
     },
-    [filteredFonts, selectedIndex, handleSelect, onOpenChange],
+    [filteredLanguages, selectedIndex, handleSelect, onOpenChange],
   );
 
   return (
@@ -118,7 +125,7 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search fonts..."
+            placeholder="Search languages..."
             value={search}
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
@@ -133,16 +140,16 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
           ref={listRef}
           className="max-h-[250px] sm:max-h-[300px] overflow-y-auto py-2"
         >
-          {filteredFonts.length === 0 ? (
+          {filteredLanguages.length === 0 ? (
             <div className="py-6 text-center text-sm text-muted-foreground">
-              No fonts found.
+              No languages found.
             </div>
           ) : (
-            filteredFonts.map((f, index) => (
+            filteredLanguages.map((l, index) => (
               <button
-                key={f.value}
+                key={l.id}
                 data-index={index}
-                onClick={() => handleSelect(f.value)}
+                onClick={() => handleSelect(l.id as NaturalLanguage)}
                 onMouseEnter={() => setSelectedIndex(index)}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2 text-sm transition-colors",
@@ -151,10 +158,9 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                <span className={cn("flex-1 text-left", f.className)}>
-                  {f.label}
-                </span>
-                {font === f.value && (
+                <span className="text-lg">{l.flag}</span>
+                <span className="flex-1 text-left">{l.name}</span>
+                {language === l.id && (
                   <span className="text-primary text-xs">active</span>
                 )}
               </button>
@@ -164,8 +170,8 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
 
         <div className="border-t border-border px-3 py-2 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Type className="h-3 w-3" />
-            <span>{fontOptions.length} fonts</span>
+            <Languages className="h-3 w-3" />
+            <span>{naturalLanguageOptions.length} languages</span>
           </div>
           <div className="hidden sm:flex items-center gap-2">
             <kbd className="px-1.5 py-0.5 rounded border border-border bg-muted font-mono text-[10px]">
@@ -183,4 +189,4 @@ const FontPalette = ({ open, onOpenChange }: FontPaletteProps) => {
   );
 };
 
-export default FontPalette;
+export default LanguagePalette;
