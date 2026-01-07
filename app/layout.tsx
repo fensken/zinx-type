@@ -237,16 +237,17 @@ export const metadata: Metadata = {
   category: "Technology",
 };
 
-// Script to prevent theme flash - runs before React hydration
-const themeScript = `
+// Script to prevent theme and settings flash - runs before React hydration
+const preHydrationScript = `
   (function() {
+    var root = document.documentElement;
     try {
-      var stored = localStorage.getItem('zinx-theme');
-      if (stored) {
-        var parsed = JSON.parse(stored);
-        var theme = parsed.state && parsed.state.theme;
+      // Theme
+      var themeStored = localStorage.getItem('zinx-theme');
+      if (themeStored) {
+        var themeParsed = JSON.parse(themeStored);
+        var theme = themeParsed.state && themeParsed.state.theme;
         if (theme) {
-          var root = document.documentElement;
           root.classList.remove('light', 'dark');
           if (theme === 'light') {
             root.classList.add('light');
@@ -259,6 +260,40 @@ const themeScript = `
         }
       }
     } catch (e) {}
+
+    try {
+      // Settings - store as data attributes for CSS-based initial state
+      var settingsStored = localStorage.getItem('zinx-settings');
+      if (settingsStored) {
+        var settingsParsed = JSON.parse(settingsStored);
+        var state = settingsParsed.state;
+        if (state) {
+          if (state.mode) root.dataset.mode = state.mode;
+          if (state.wordCount) root.dataset.wordCount = state.wordCount;
+          if (state.timeLimit) root.dataset.timeLimit = state.timeLimit;
+          if (state.difficulty) root.dataset.difficulty = state.difficulty;
+          if (state.includeNumbers) root.dataset.includeNumbers = 'true';
+          if (state.includePunctuation) root.dataset.includePunctuation = 'true';
+          if (state.includeSpecialCharacters) root.dataset.includeSpecialCharacters = 'true';
+          if (state.codeLanguage) root.dataset.codeLanguage = state.codeLanguage;
+        }
+      }
+    } catch (e) {}
+
+    try {
+      // Font - store as data attribute
+      var fontStored = localStorage.getItem('zinx-font');
+      if (fontStored) {
+        var fontParsed = JSON.parse(fontStored);
+        var font = fontParsed.state && fontParsed.state.font;
+        if (font) {
+          root.dataset.font = font;
+        }
+      }
+    } catch (e) {}
+
+    // Mark as pre-hydrated so components know settings are available
+    root.dataset.hydrated = 'pending';
   })();
 `;
 
@@ -270,7 +305,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: preHydrationScript }} />
       </head>
       <body className="antialiased min-h-dvh flex flex-col supports-[height:100dvh]:min-h-dvh">
         <ThemeProvider

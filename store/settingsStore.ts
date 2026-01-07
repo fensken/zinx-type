@@ -16,6 +16,7 @@ interface SettingsState {
   includeNumbers: boolean;
   includePunctuation: boolean;
   includeSpecialCharacters: boolean;
+  _hasHydrated: boolean;
 }
 
 interface SettingsActions {
@@ -29,6 +30,7 @@ interface SettingsActions {
   setIncludeNumbers: (include: boolean) => void;
   setIncludePunctuation: (include: boolean) => void;
   setIncludeSpecialCharacters: (include: boolean) => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 type SettingsStore = SettingsState & SettingsActions;
@@ -44,6 +46,7 @@ const initialState: SettingsState = {
   includeNumbers: false,
   includePunctuation: false,
   includeSpecialCharacters: false,
+  _hasHydrated: false,
 };
 
 export const useSettingsStore = create<SettingsStore>()(
@@ -63,9 +66,19 @@ export const useSettingsStore = create<SettingsStore>()(
         set({ includePunctuation }),
       setIncludeSpecialCharacters: (includeSpecialCharacters) =>
         set({ includeSpecialCharacters }),
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
     {
       name: "zinx-settings",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+      partialize: (state) => {
+        // Exclude _hasHydrated from being persisted
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _hasHydrated, setHasHydrated, ...rest } = state;
+        return rest;
+      },
     },
   ),
 );

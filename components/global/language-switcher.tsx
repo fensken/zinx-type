@@ -9,10 +9,13 @@ import LanguagePalette from "./language-palette";
 
 const LanguageSwitcher = () => {
   const language = useSettingsStore((state) => state.language);
+  const hasHydrated = useSettingsStore((state) => state._hasHydrated);
   const [open, setOpen] = useState(false);
 
-  // Find current language option
-  const currentLanguage = naturalLanguageOptions.find((l) => l.id === language);
+  // Find current language option - only show flag after hydration to prevent flash
+  const currentLanguage = hasHydrated
+    ? naturalLanguageOptions.find((l) => l.id === language)
+    : null;
 
   // Keyboard shortcut: Ctrl/Cmd + Shift + L
   useEffect(() => {

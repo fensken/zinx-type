@@ -31,10 +31,12 @@ export interface FontOption {
 
 interface FontState {
   font: FontName;
+  _hasHydrated: boolean;
 }
 
 interface FontActions {
   setFont: (font: FontName) => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 type FontStore = FontState & FontActions;
@@ -43,10 +45,20 @@ export const useFontStore = create<FontStore>()(
   persist(
     (set) => ({
       font: "geist-mono",
+      _hasHydrated: false,
       setFont: (font) => set({ font }),
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
     {
       name: "zinx-font",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+      partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { _hasHydrated, setHasHydrated, ...rest } = state;
+        return rest;
+      },
     },
   ),
 );
