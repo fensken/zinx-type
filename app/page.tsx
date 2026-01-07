@@ -17,14 +17,16 @@ export default function Page() {
   const showResults = endTime !== null;
 
   return (
-    <main className="my-4 md:my-6 px-3 sm:px-4 md:px-6 justify-center flex flex-col items-center max-w-6xl mx-auto">
+    <main
+      className={`min-h-full px-3 sm:px-4 md:px-6 flex flex-col items-center justify-center mx-auto py-4 md:py-6 ${showResults ? "max-w-7xl" : "max-w-6xl"}`}
+    >
       {showResults ? (
         <Results onRestart={handleRestart} />
       ) : (
-        <>
+        <div className="flex flex-col items-center w-full gap-8 sm:gap-12 md:gap-16">
           <TypingToolbar />
           <TypingPractice />
-        </>
+        </div>
       )}
     </main>
   );

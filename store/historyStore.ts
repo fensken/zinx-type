@@ -52,6 +52,7 @@ interface HistoryActions {
   getAverageWpm: (days?: number) => number;
   getAverageAccuracy: (days?: number) => number;
   getImprovementPercentage: () => number;
+  getDailyImprovement: () => number;
 }
 
 type HistoryStore = HistoryState & HistoryActions;
@@ -242,19 +243,34 @@ export const useHistoryStore = create<HistoryStore>()(
 
       getImprovementPercentage: () => {
         const results = get().results;
-        if (results.length < 10) return 0;
+        if (results.length < 6) return 0;
 
-        // Compare last 5 tests with first 5 tests
-        const recent = results.slice(0, 5);
-        const older = results.slice(-5);
+        // Compare last 3 tests with previous 3 tests
+        const recent = results.slice(0, 3);
+        const previous = results.slice(3, 6);
 
         const recentAvg =
           recent.reduce((sum, r) => sum + r.wpm, 0) / recent.length;
-        const olderAvg =
-          older.reduce((sum, r) => sum + r.wpm, 0) / older.length;
+        const previousAvg =
+          previous.reduce((sum, r) => sum + r.wpm, 0) / previous.length;
 
-        if (olderAvg === 0) return 0;
-        return ((recentAvg - olderAvg) / olderAvg) * 100;
+        if (previousAvg === 0) return 0;
+        return ((recentAvg - previousAvg) / previousAvg) * 100;
+      },
+
+      getDailyImprovement: () => {
+        const dailyStats = get().dailyStats;
+        if (dailyStats.length < 2) return 0;
+
+        // Compare today's average with yesterday's average
+        const today = dailyStats[0];
+        const yesterday = dailyStats[1];
+
+        if (!today || !yesterday || yesterday.averageWpm === 0) return 0;
+        return (
+          ((today.averageWpm - yesterday.averageWpm) / yesterday.averageWpm) *
+          100
+        );
       },
     }),
     {

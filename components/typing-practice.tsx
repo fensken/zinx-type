@@ -553,15 +553,13 @@ const TypingPractice = () => {
   }, [revealed, paused, resumeTest]);
 
   const progressDisplay = (() => {
-    if (!testActive && startTime === null) return null;
-
     if (mode === "time") {
       const remainingSeconds = Math.max(
         0,
         timeLimit - Math.floor(elapsedTime / 1000),
       );
-      return `${remainingSeconds}`;
-    } else if (mode === "word" || mode === "quote") {
+      return `${remainingSeconds}s`;
+    } else if (mode === "word" || mode === "quote" || mode === "custom") {
       return `${wordIndex}/${words.length}`;
     } else if (mode === "code") {
       const percent =
@@ -577,24 +575,28 @@ const TypingPractice = () => {
   const lineHeight = 40;
 
   return (
-    <div className="relative w-full mt-16 sm:mt-24 md:mt-32">
-      {/* Caps Lock Warning */}
-      {capsLockOn && (
-        <div className="absolute -top-20 sm:-top-24 md:-top-28 left-1/2 -translate-x-1/2 flex items-center gap-2 text-amber-500 text-sm font-mono animate-pulse">
-          <AlertTriangle className="w-4 h-4" />
-          <span>Caps Lock is ON</span>
-        </div>
-      )}
-
-      {/* Progress indicator */}
-      {progressDisplay && !showOverlay && (
+    <div className="relative w-full">
+      {/* Progress indicator and Caps Lock Warning */}
+      <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8 gap-4">
+        {/* Progress/Timer - always visible */}
         <div
-          className={`absolute -top-10 sm:-top-12 md:-top-16 left-1/2 -translate-x-1/2 text-2xl sm:text-3xl md:text-4xl font-mono flex items-center gap-2 ${paused ? "text-amber-500" : "text-primary"}`}
+          className={`text-xl sm:text-2xl md:text-3xl font-mono flex items-center gap-2 ${
+            !revealed || paused ? "text-amber-500" : "text-primary"
+          }`}
         >
-          {paused && <Pause className="w-6 h-6 sm:w-8 sm:h-8" />}
-          {progressDisplay}
+          {(!revealed || paused) && <Pause className="w-5 h-5 sm:w-6 sm:h-6" />}
+          {progressDisplay || "--"}
         </div>
-      )}
+
+        {/* Caps Lock Warning */}
+        {capsLockOn && (
+          <div className="flex items-center gap-2 text-amber-500 text-xs sm:text-sm font-mono animate-pulse">
+            <AlertTriangle className="w-4 h-4" />
+            <span className="hidden sm:inline">Caps Lock is ON</span>
+            <span className="sm:hidden">CAPS</span>
+          </div>
+        )}
+      </div>
 
       {/* Words container - shows 3 lines */}
       <div
@@ -757,7 +759,7 @@ const TypingPractice = () => {
         >
           <RotateCcw size={18} />
         </Button>
-        <p className="mt-3 text-muted-foreground text-sm flex items-center gap-1">
+        <p className="mt-2 text-muted-foreground text-sm flex items-center gap-1">
           <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             CTRL
           </kbd>
@@ -775,7 +777,7 @@ const TypingPractice = () => {
           </kbd>
           <span>to restart</span>
         </p>
-        <p className="mt-2 text-sm flex text-muted-foreground items-center gap-1">
+        <p className="mt-2  text-sm flex text-muted-foreground items-center gap-1">
           <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
             ALT
           </kbd>

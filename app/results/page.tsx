@@ -20,6 +20,7 @@ export default function ResultsPage() {
   const words = useTypingStore((state) => state.words);
   const startTime = useTypingStore((state) => state.startTime);
   const endTime = useTypingStore((state) => state.endTime);
+  const pausedTime = useTypingStore((state) => state.pausedTime);
   const reset = useTypingStore((state) => state.reset);
 
   const mode = useSettingsStore((state) => state.mode);
@@ -46,8 +47,10 @@ export default function ResultsPage() {
       return null;
     }
 
-    const minutes = (endTime - startTime) / 60000;
-    const timeInSeconds = Math.round((endTime - startTime) / 1000);
+    // Subtract paused time from total elapsed time
+    const actualTime = endTime - startTime - pausedTime;
+    const minutes = actualTime / 60000;
+    const timeInSeconds = Math.round(actualTime / 1000);
 
     let correctChars = 0;
     let incorrectChars = 0;
@@ -76,7 +79,7 @@ export default function ResultsPage() {
       extraChars,
       time: timeInSeconds,
     };
-  }, [words, startTime, endTime]);
+  }, [words, startTime, endTime, pausedTime]);
 
   // Save result to history on mount (only once)
   useEffect(() => {

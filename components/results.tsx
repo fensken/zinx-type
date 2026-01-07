@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useCallback } from "react";
-import { RotateCcw, Trophy, TrendingUp, Flame, Target } from "lucide-react";
+import {
+  RotateCcw,
+  Trophy,
+  TrendingUp,
+  Flame,
+  Target,
+  Calendar,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
@@ -22,6 +29,7 @@ const Results = ({ onRestart }: ResultsProps) => {
   const words = useTypingStore((state) => state.words);
   const startTime = useTypingStore((state) => state.startTime);
   const endTime = useTypingStore((state) => state.endTime);
+  const pausedTime = useTypingStore((state) => state.pausedTime);
 
   const mode = useSettingsStore((state) => state.mode);
   const wordCount = useSettingsStore((state) => state.wordCount);
@@ -41,6 +49,9 @@ const Results = ({ onRestart }: ResultsProps) => {
   const getImprovementPercentage = useHistoryStore(
     (state) => state.getImprovementPercentage,
   );
+  const getDailyImprovement = useHistoryStore(
+    (state) => state.getDailyImprovement,
+  );
 
   const getTestTypeLabel = useCallback(() => {
     if (mode === "quote") {
@@ -58,8 +69,10 @@ const Results = ({ onRestart }: ResultsProps) => {
       return null;
     }
 
-    const minutes = (endTime - startTime) / 60000;
-    const timeInSeconds = Math.round((endTime - startTime) / 1000);
+    // Subtract paused time from total elapsed time
+    const actualTime = endTime - startTime - pausedTime;
+    const minutes = actualTime / 60000;
+    const timeInSeconds = Math.round(actualTime / 1000);
 
     let correctChars = 0;
     let incorrectChars = 0;
@@ -88,7 +101,7 @@ const Results = ({ onRestart }: ResultsProps) => {
       extraChars,
       time: timeInSeconds,
     };
-  }, [words, startTime, endTime]);
+  }, [words, startTime, endTime, pausedTime]);
 
   const modeKey = getTestTypeLabel();
   const personalBest = personalBests[modeKey];
@@ -127,13 +140,14 @@ const Results = ({ onRestart }: ResultsProps) => {
 
   const averageWpm = getAverageWpm(7);
   const improvement = getImprovementPercentage();
+  const dailyImprovement = getDailyImprovement();
 
   if (!displayStats) {
     return <div className="text-muted-foreground">Loading...</div>;
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto font-mono">
+    <div className="w-full max-w-7xl mx-auto font-mono">
       {/* New Personal Best Badge */}
       {isNewPersonalBest && (
         <div className="flex items-center justify-center gap-2 mb-4 text-amber-500">
@@ -195,7 +209,7 @@ const Results = ({ onRestart }: ResultsProps) => {
 
       {/* Personal Stats Summary */}
       {totalTestsCompleted > 0 && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center mb-8 p-4 bg-card rounded-lg">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 text-center mb-8 p-4 bg-card rounded-lg">
           <div className="flex flex-col items-center gap-1">
             <Trophy className="w-4 h-4 text-amber-500" />
             <div className="text-xs text-muted-foreground">best wpm</div>
@@ -211,15 +225,30 @@ const Results = ({ onRestart }: ResultsProps) => {
           </div>
 
           <div className="flex flex-col items-center gap-1">
+            <Calendar
+              className={`w-4 h-4 ${dailyImprovement >= 0 ? "text-emerald-500" : "text-destructive"}`}
+            />
+            <div className="text-xs text-muted-foreground">daily</div>
+            <div
+              className={`text-lg font-bold ${dailyImprovement >= 0 ? "text-emerald-500" : "text-destructive"}`}
+            >
+              {dailyImprovement === 0
+                ? "--"
+                : `${dailyImprovement >= 0 ? "+" : ""}${Math.round(dailyImprovement)}%`}
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-1">
             <TrendingUp
               className={`w-4 h-4 ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
             />
-            <div className="text-xs text-muted-foreground">improvement</div>
+            <div className="text-xs text-muted-foreground">last 3</div>
             <div
               className={`text-lg font-bold ${improvement >= 0 ? "text-emerald-500" : "text-destructive"}`}
             >
-              {improvement >= 0 ? "+" : ""}
-              {Math.round(improvement)}%
+              {improvement === 0
+                ? "--"
+                : `${improvement >= 0 ? "+" : ""}${Math.round(improvement)}%`}
             </div>
           </div>
 
@@ -258,9 +287,44 @@ const Results = ({ onRestart }: ResultsProps) => {
         </Button>
       </div>
 
-      <p className="mt-4 text-center text-muted-foreground text-sm">
-        press <span className="text-primary">ctrl/cmd + enter</span> to restart
-      </p>
+      <div className="flex flex-col items-center mt-4 gap-2">
+        <p className="text-muted-foreground text-sm flex items-center gap-1">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            CTRL
+          </kbd>
+          <span>+</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            ENTER
+          </kbd>
+          <span className="text-muted-foreground/50">/</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            ⌘
+          </kbd>
+          <span>+</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            ENTER
+          </kbd>
+          <span>to restart</span>
+        </p>
+        <p className="text-sm flex text-muted-foreground items-center gap-1">
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            ALT
+          </kbd>
+          <span>+</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            F4
+          </kbd>
+          <span className="text-muted-foreground/30">/</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            ⌘
+          </kbd>
+          <span>+</span>
+          <kbd className="px-2 py-1 rounded-full bg-primary/15 text-primary font-mono">
+            Q
+          </kbd>
+          <span>to boost WPM 😜</span>
+        </p>
+      </div>
 
       {/* Session History */}
       {previousResults.length > 0 && (

@@ -281,7 +281,7 @@ export default function RootLayout({
           storageKey="zinx-base-theme"
         >
           <Header />
-          <div className="flex-1">{children}</div>
+          <div className="flex-1 flex flex-col">{children}</div>
           <Footer />
         </ThemeProvider>
       </body>
