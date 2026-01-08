@@ -165,7 +165,7 @@ export default function StatsPage() {
           <h1 className="text-2xl font-bold">Your Stats</h1>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
             <HardDrive className="w-3.5 h-3.5" />
-            <span>Saved locally (last 10 tests)</span>
+            <span>Saved locally (last {results.length} of 100 max)</span>
           </div>
         </div>
 
@@ -328,7 +328,6 @@ export default function StatsPage() {
             <h3 className="text-sm text-muted-foreground mb-4 flex items-center gap-2">
               <Trophy className="w-4 h-4 text-yellow-500" />
               Best Scores by Mode
-              <span className="text-muted-foreground/50">(last 10 tests)</span>
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {personalBestsArray.map((pb) => (
@@ -362,7 +361,9 @@ export default function StatsPage() {
             <h3 className="text-sm text-muted-foreground mb-4 flex items-center gap-2">
               <Calendar className="w-4 h-4" />
               Daily Summary
-              <span className="text-muted-foreground/50">(last 7 days)</span>
+              <span className="text-muted-foreground/50">
+                (last {dailyStats.length} days)
+              </span>
             </h3>
             <div className="space-y-2">
               {dailyStats.map((day) => (
@@ -401,7 +402,7 @@ export default function StatsPage() {
           <h3 className="text-sm text-muted-foreground mb-4">
             Test History
             <span className="text-muted-foreground/50 ml-2">
-              (last 10 saved)
+              ({results.length} tests)
             </span>
           </h3>
           <div className="space-y-2">

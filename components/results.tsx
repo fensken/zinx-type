@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
-import { useHistoryStore } from "@/store/historyStore";
+import { useHistoryStore, getModeCategory } from "@/store/historyStore";
 
 const formatTime = (timestamp: number) => {
   const date = new Date(timestamp);
@@ -30,14 +30,16 @@ const Results = ({ onRestart }: ResultsProps) => {
   const startTime = useTypingStore((state) => state.startTime);
   const endTime = useTypingStore((state) => state.endTime);
   const pausedTime = useTypingStore((state) => state.pausedTime);
+  const codeText = useTypingStore((state) => state.codeText);
+  const codeTypedChars = useTypingStore((state) => state.codeTypedChars);
 
   const mode = useSettingsStore((state) => state.mode);
   const wordCount = useSettingsStore((state) => state.wordCount);
   const timeLimit = useSettingsStore((state) => state.timeLimit);
   const difficulty = useSettingsStore((state) => state.difficulty);
   const language = useSettingsStore((state) => state.language);
+  const codeLanguage = useSettingsStore((state) => state.codeLanguage);
 
-  const results = useHistoryStore((state) => state.results);
   const addResult = useHistoryStore((state) => state.addResult);
   const personalBests = useHistoryStore((state) => state.personalBests);
   const totalTestsCompleted = useHistoryStore(
@@ -49,20 +51,31 @@ const Results = ({ onRestart }: ResultsProps) => {
   const getImprovementPercentage = useHistoryStore(
     (state) => state.getImprovementPercentage,
   );
+  const getRecentResultsByCategory = useHistoryStore(
+    (state) => state.getRecentResultsByCategory,
+  );
 
   const getTestTypeLabel = useCallback(() => {
     if (mode === "quote") {
       return `quote ${difficulty}`;
     } else if (mode === "time") {
       return `time ${timeLimit}s`;
+    } else if (mode === "code") {
+      return `code ${codeLanguage}`;
+    } else if (mode === "custom") {
+      return `custom`;
     } else {
       return `words ${wordCount}`;
     }
-  }, [mode, difficulty, timeLimit, wordCount]);
+  }, [mode, difficulty, timeLimit, wordCount, codeLanguage]);
 
   // Calculate stats from the completed test
   const stats = useMemo(() => {
-    if (!startTime || !endTime || words.length === 0) {
+    // For code mode, check codeText instead of words
+    const isCodeMode = mode === "code";
+    const hasData = isCodeMode ? codeText.length > 0 : words.length > 0;
+
+    if (!startTime || !endTime || !hasData) {
       return null;
     }
 
@@ -75,13 +88,28 @@ const Results = ({ onRestart }: ResultsProps) => {
     let incorrectChars = 0;
     let extraChars = 0;
 
-    words.forEach((word) => {
-      word.chars.forEach((char) => {
-        if (char.status === "correct") correctChars++;
-        else if (char.status === "incorrect") incorrectChars++;
+    if (isCodeMode) {
+      // Code mode: compare typed chars with expected chars
+      const minLen = Math.min(codeTypedChars.length, codeText.length);
+      for (let i = 0; i < minLen; i++) {
+        if (codeTypedChars[i] === codeText[i]) {
+          correctChars++;
+        } else {
+          incorrectChars++;
+        }
+      }
+      // Extra chars are those typed beyond the code length
+      extraChars = Math.max(0, codeTypedChars.length - codeText.length);
+    } else {
+      // Word-based modes
+      words.forEach((word) => {
+        word.chars.forEach((char) => {
+          if (char.status === "correct") correctChars++;
+          else if (char.status === "incorrect") incorrectChars++;
+        });
+        extraChars += word.extraChars.length;
       });
-      extraChars += word.extraChars.length;
-    });
+    }
 
     const totalTyped = correctChars + incorrectChars + extraChars;
     const wpm = minutes > 0 ? Math.round(correctChars / 5 / minutes) : 0;
@@ -98,12 +126,25 @@ const Results = ({ onRestart }: ResultsProps) => {
       extraChars,
       time: timeInSeconds,
     };
-  }, [words, startTime, endTime, pausedTime]);
+  }, [words, startTime, endTime, pausedTime, mode, codeText, codeTypedChars]);
 
   const modeKey = getTestTypeLabel();
+  const modeCategory = getModeCategory(modeKey);
   const personalBest = personalBests[modeKey];
   const isNewPersonalBest =
     stats && personalBest && stats.wpm >= personalBest.wpm;
+
+  // Get category label for display
+  const getCategoryLabel = useCallback(() => {
+    switch (modeCategory) {
+      case "standard":
+        return "word/time";
+      case "quote":
+        return "quote/custom";
+      case "code":
+        return "code";
+    }
+  }, [modeCategory]);
 
   // Save result to history on mount (only once)
   useEffect(() => {
@@ -130,10 +171,30 @@ const Results = ({ onRestart }: ResultsProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onRestart]);
 
+  // Get recent results filtered by the same mode category
+  // Memoize to prevent recalculation and ensure consistency
+  const categoryResults = useMemo(() => {
+    return getRecentResultsByCategory(modeCategory, 6);
+  }, [getRecentResultsByCategory, modeCategory]);
+
   // Show the most recent result from history if stats not available
-  const displayStats = stats || results[0];
-  const displayMode = stats ? getTestTypeLabel() : results[0]?.mode || "";
-  const previousResults = stats ? results.slice(0, 5) : results.slice(1, 6);
+  const displayStats = stats || categoryResults[0];
+  const displayMode = stats
+    ? getTestTypeLabel()
+    : categoryResults[0]?.mode || "";
+
+  // For previous results, we need to handle the timing carefully:
+  // - If stats exists (current test just completed), the result was just saved
+  //   so categoryResults[0] is the current test - skip it
+  // - If stats is null (viewing from history), show from the beginning
+  const previousResults = useMemo(() => {
+    if (stats) {
+      // Current test just completed and saved - skip the first result (which is the current one)
+      return categoryResults.slice(1, 6);
+    }
+    // Viewing from history - show all
+    return categoryResults.slice(0, 5);
+  }, [stats, categoryResults]);
 
   const averageWpm = getAverageWpm(7);
   const improvement = getImprovementPercentage();
@@ -316,11 +377,11 @@ const Results = ({ onRestart }: ResultsProps) => {
         </p>
       </div>
 
-      {/* Session History */}
+      {/* Session History - filtered by mode category */}
       {previousResults.length > 0 && (
         <div className="mt-10 md:mt-16 border-t border-border pt-6 md:pt-8">
           <h3 className="text-muted-foreground text-sm mb-4 text-center">
-            recent history ({totalTestsCompleted} tests completed)
+            recent {getCategoryLabel()} tests
           </h3>
           <div className="space-y-3">
             {previousResults.map((result) => (

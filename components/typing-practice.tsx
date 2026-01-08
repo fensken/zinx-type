@@ -90,9 +90,13 @@ const TypingPractice = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [capsLockOn, setCapsLockOn] = useState(false);
-  const [codeText, setCodeText] = useState("");
-  const [codeTypedChars, setCodeTypedChars] = useState("");
-  const [codeCursorPos, setCodeCursorPos] = useState(0);
+  // Code mode state is now in the store
+  const codeText = useTypingStore((state) => state.codeText);
+  const codeTypedChars = useTypingStore((state) => state.codeTypedChars);
+  const codeCursorPos = useTypingStore((state) => state.codeCursorPos);
+  const resetCode = useTypingStore((state) => state.resetCode);
+  const setCodeTypedChars = useTypingStore((state) => state.setCodeTypedChars);
+  const setCodeCursorPos = useTypingStore((state) => state.setCodeCursorPos);
   const containerRef = useRef<HTMLDivElement>(null);
   const wordsContainerRef = useRef<HTMLDivElement>(null);
   const hiddenInputRef = useRef<HTMLInputElement>(null);
@@ -151,11 +155,8 @@ const TypingPractice = () => {
       // Code mode - use real code snippets with Shiki highlighting
       const snippet = getRandomSnippetByDifficulty(codeLanguage, difficulty);
       const fullCode = snippet.lines.join("\n");
-      setCodeText(fullCode);
-      setCodeTypedChars("");
-      setCodeCursorPos(0);
       setQuoteSource(null);
-      reset([]); // Empty words array for code mode
+      resetCode(fullCode); // Use store's resetCode for code mode
     } else if (mode === "custom") {
       // Custom text mode - use user provided text
       if (customText.trim()) {
@@ -233,15 +234,17 @@ const TypingPractice = () => {
     }
   }, [wordIndex, words.length]);
 
-  // Initialize on mount and regenerate when words are reset to empty (external reset)
+  // Initialize on mount and regenerate when state is reset to empty (external reset like header click)
   /* eslint-disable react-hooks/set-state-in-effect -- Intentional initialization and state sync patterns */
   useEffect(() => {
-    // When words become empty (from external reset like header click), regenerate test
-    // Skip if we're still in initial loading phase
-    if (words.length === 0 && !loading) {
+    // When words become empty (for word-based modes) or codeText becomes empty (for code mode),
+    // regenerate the test. Skip if we're still in initial loading phase.
+    const isEmpty =
+      mode === "code" ? codeText.length === 0 : words.length === 0;
+    if (isEmpty && !loading) {
       generateTest();
     }
-  }, [words.length, loading, generateTest]);
+  }, [words.length, codeText.length, loading, generateTest, mode]);
 
   // Set loading to false on mount
   useEffect(() => {
@@ -368,8 +371,8 @@ const TypingPractice = () => {
           e.preventDefault();
           if (codeCursorPos > 0) {
             playKeyPress();
-            setCodeTypedChars((prev) => prev.slice(0, -1));
-            setCodeCursorPos((prev) => prev - 1);
+            setCodeTypedChars(codeTypedChars.slice(0, -1));
+            setCodeCursorPos(codeCursorPos - 1);
           }
           return;
         }
@@ -399,7 +402,7 @@ const TypingPractice = () => {
                 codeCursorPos + 1,
                 codeCursorPos + 1 + skipCount,
               );
-            setCodeTypedChars((prev) => prev + autoCompleted);
+            setCodeTypedChars(codeTypedChars + autoCompleted);
             setCodeCursorPos(codeCursorPos + 1 + skipCount);
 
             // Check if complete
@@ -441,7 +444,7 @@ const TypingPractice = () => {
               codeCursorPos,
               codeCursorPos + skipCount,
             );
-            setCodeTypedChars((prev) => prev + skippedChars);
+            setCodeTypedChars(codeTypedChars + skippedChars);
             setCodeCursorPos(codeCursorPos + skipCount);
 
             // Check if complete
@@ -466,8 +469,8 @@ const TypingPractice = () => {
             playError();
           }
 
-          setCodeTypedChars((prev) => prev + e.key);
-          setCodeCursorPos((prev) => prev + 1);
+          setCodeTypedChars(codeTypedChars + e.key);
+          setCodeCursorPos(codeCursorPos + 1);
 
           // Check if complete
           if (codeCursorPos + 1 >= codeText.length) {
@@ -533,7 +536,10 @@ const TypingPractice = () => {
       playError,
       mode,
       codeText,
+      codeTypedChars,
       codeCursorPos,
+      setCodeTypedChars,
+      setCodeCursorPos,
       endTest,
     ],
   );

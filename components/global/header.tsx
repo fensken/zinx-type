@@ -12,13 +12,13 @@ import LanguageSwitcher from "./language-switcher";
 
 const Header = () => {
   const pathname = usePathname();
-  const reset = useTypingStore((state) => state.reset);
+  const resetAll = useTypingStore((state) => state.resetAll);
 
   const handleLogoClick = (e: React.MouseEvent) => {
     // If we're on the home page, reset the test instead of navigating
     if (pathname === "/") {
       e.preventDefault();
-      reset([]);
+      resetAll();
     }
   };
 

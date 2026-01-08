@@ -11,6 +11,7 @@ export interface TestResult {
   extraChars: number;
   time: number;
   mode: string;
+  modeCategory: ModeCategory; // Category for grouping results
   language?: string;
   timestamp: number;
 }
@@ -31,6 +32,19 @@ export interface DailyStats {
   bestWpm: number;
 }
 
+// Mode categories for grouping results
+export type ModeCategory = "standard" | "quote" | "code";
+
+// Helper function to get mode category from mode string
+export function getModeCategory(mode: string): ModeCategory {
+  const lowerMode = mode.toLowerCase();
+  if (lowerMode.startsWith("code")) return "code";
+  if (lowerMode.startsWith("quote") || lowerMode.startsWith("custom"))
+    return "quote";
+  // word and time modes are grouped together as "standard"
+  return "standard";
+}
+
 interface HistoryState {
   results: TestResult[];
   personalBests: Record<string, PersonalBest>; // keyed by mode (e.g., "time-30", "word-25")
@@ -45,9 +59,15 @@ interface HistoryState {
 }
 
 interface HistoryActions {
-  addResult: (result: Omit<TestResult, "id" | "timestamp">) => void;
+  addResult: (
+    result: Omit<TestResult, "id" | "timestamp" | "modeCategory">,
+  ) => void;
   clearHistory: () => void;
   getRecentResults: (count: number) => TestResult[];
+  getRecentResultsByCategory: (
+    category: ModeCategory,
+    count: number,
+  ) => TestResult[];
   getPersonalBest: (mode: string) => PersonalBest | null;
   getAverageWpm: (days?: number) => number;
   getAverageAccuracy: (days?: number) => number;
@@ -57,8 +77,8 @@ interface HistoryActions {
 
 type HistoryStore = HistoryState & HistoryActions;
 
-const MAX_RESULTS = 10; // Store last 10 results (local storage only)
-const MAX_DAILY_STATS = 7; // Keep 7 days of daily stats
+const MAX_RESULTS = 100; // Store last 100 results
+const MAX_DAILY_STATS = 30; // Keep 30 days of daily stats
 
 function getDateString(timestamp: number): string {
   return new Date(timestamp).toISOString().split("T")[0];
@@ -110,6 +130,7 @@ export const useHistoryStore = create<HistoryStore>()(
           ...result,
           id: crypto.randomUUID(),
           timestamp: Date.now(),
+          modeCategory: getModeCategory(result.mode),
         };
 
         set((state) => {
@@ -205,6 +226,12 @@ export const useHistoryStore = create<HistoryStore>()(
 
       getRecentResults: (count: number) => {
         return get().results.slice(0, count);
+      },
+
+      getRecentResultsByCategory: (category: ModeCategory, count: number) => {
+        return get()
+          .results.filter((r) => r.modeCategory === category)
+          .slice(0, count);
       },
 
       getPersonalBest: (mode: string) => {

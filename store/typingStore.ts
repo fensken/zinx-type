@@ -25,10 +25,16 @@ interface TypingState {
   paused: boolean;
   pausedTime: number; // Total time spent paused
   pauseStartTime: number | null; // When current pause started
+  // Code mode specific state
+  codeText: string;
+  codeTypedChars: string;
+  codeCursorPos: number;
 }
 
 interface TypingActions {
   reset: (words: string[]) => void;
+  resetCode: (code: string) => void;
+  resetAll: () => void; // Resets everything to trigger regeneration
   startTimer: () => void;
   endTest: () => void;
   pauseTest: () => void;
@@ -37,6 +43,9 @@ interface TypingActions {
   backspace: () => void;
   space: () => void;
   getElapsedTime: () => number;
+  // Code mode actions
+  setCodeTypedChars: (chars: string) => void;
+  setCodeCursorPos: (pos: number) => void;
 }
 
 type TypingStore = TypingState & TypingActions;
@@ -59,6 +68,9 @@ const initialState: TypingState = {
   paused: false,
   pausedTime: 0,
   pauseStartTime: null,
+  codeText: "",
+  codeTypedChars: "",
+  codeCursorPos: 0,
 };
 
 // Store
@@ -70,6 +82,17 @@ export const useTypingStore = create<TypingStore>((set, get) => ({
       ...initialState,
       words: wordList.map(createWord),
     }),
+
+  resetCode: (code: string) =>
+    set({
+      ...initialState,
+      codeText: code,
+      codeTypedChars: "",
+      codeCursorPos: 0,
+    }),
+
+  // Reset everything to initial state - used by header logo click to trigger regeneration
+  resetAll: () => set({ ...initialState }),
 
   startTimer: () => {
     if (!get().startTime) {
@@ -218,6 +241,10 @@ export const useTypingStore = create<TypingStore>((set, get) => ({
       endTest();
     }
   },
+
+  // Code mode actions
+  setCodeTypedChars: (chars: string) => set({ codeTypedChars: chars }),
+  setCodeCursorPos: (pos: number) => set({ codeCursorPos: pos }),
 }));
 
 // Selector hooks for better performance
