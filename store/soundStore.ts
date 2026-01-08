@@ -11,7 +11,12 @@ export type SoundPack =
   | "bubble"
   | "click"
   | "nk-cream"
-  | "holy-panda";
+  | "holy-panda"
+  | "gateron-ink"
+  | "topre"
+  | "box-jade"
+  | "silent-alpaca"
+  | "membrane";
 
 export interface SoundSettings {
   enabled: boolean;
@@ -62,6 +67,12 @@ export const soundPackOptions: {
   { id: "click", name: "Click", description: "Sharp click" },
   { id: "nk-cream", name: "NK Cream", description: "Smooth linear" },
   { id: "holy-panda", name: "Holy Panda", description: "Tactile thock" },
+  // New sound packs
+  { id: "gateron-ink", name: "Gateron Ink", description: "Deep smooth linear" },
+  { id: "topre", name: "Topre", description: "Rubber dome thock" },
+  { id: "box-jade", name: "Box Jade", description: "Crispy clicky" },
+  { id: "silent-alpaca", name: "Silent Alpaca", description: "Muted linear" },
+  { id: "membrane", name: "Membrane", description: "Mushy office kb" },
 ];
 
 export const useSoundStore = create<SoundStore>()(

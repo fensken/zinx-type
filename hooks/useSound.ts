@@ -400,6 +400,277 @@ function generateKeySound(
         osc2.stop(now + 0.02);
         break;
       }
+
+      case "gateron-ink": {
+        // Gateron Ink: deep smooth linear with pronounced bottom out
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const osc3 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const gain3 = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        osc3.connect(gain3);
+        gain1.connect(filter);
+        gain2.connect(filter);
+        gain3.connect(ctx.destination);
+        filter.connect(ctx.destination);
+
+        filter.type = "lowpass";
+        filter.frequency.value = 1800;
+        filter.Q.value = 0.7;
+
+        // Deep resonant bottom out
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(isError ? 80 : 160, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 40 : 80,
+          now + 0.08,
+        );
+
+        // Mid body
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(isError ? 120 : 320, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 60 : 160,
+          now + 0.05,
+        );
+
+        // Subtle high click
+        osc3.type = "sine";
+        osc3.frequency.setValueAtTime(isError ? 400 : 1200, now);
+        osc3.frequency.exponentialRampToValueAtTime(
+          isError ? 200 : 600,
+          now + 0.015,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.28, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        gain2.gain.setValueAtTime(volume * 0.18, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain3.gain.setValueAtTime(volume * 0.08, now);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+        osc1.start(now);
+        osc1.stop(now + 0.08);
+        osc2.start(now);
+        osc2.stop(now + 0.05);
+        osc3.start(now);
+        osc3.stop(now + 0.02);
+        break;
+      }
+
+      case "topre": {
+        // Topre: distinctive rubber dome thock with cushioned feel
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const filter1 = ctx.createBiquadFilter();
+        const filter2 = ctx.createBiquadFilter();
+
+        osc1.connect(filter1);
+        osc2.connect(filter2);
+        filter1.connect(gain1);
+        filter2.connect(gain2);
+        gain1.connect(ctx.destination);
+        gain2.connect(ctx.destination);
+
+        filter1.type = "lowpass";
+        filter1.frequency.value = 800;
+        filter1.Q.value = 2;
+
+        filter2.type = "bandpass";
+        filter2.frequency.value = 400;
+        filter2.Q.value = 3;
+
+        // Rubber thock
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(isError ? 150 : 280, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 75 : 140,
+          now + 0.07,
+        );
+
+        // Cushioned bottom
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(isError ? 100 : 200, now + 0.01);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 50 : 100,
+          now + 0.1,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.22, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(volume * 0.15, now + 0.015);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+        osc1.start(now);
+        osc1.stop(now + 0.07);
+        osc2.start(now);
+        osc2.stop(now + 0.1);
+        break;
+      }
+
+      case "box-jade": {
+        // Box Jade: crispy clicky with thick click bar
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const osc3 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const gain3 = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(gain1);
+        osc2.connect(gain2);
+        osc3.connect(gain3);
+        gain1.connect(filter);
+        gain2.connect(ctx.destination);
+        gain3.connect(ctx.destination);
+        filter.connect(ctx.destination);
+
+        filter.type = "highpass";
+        filter.frequency.value = 1500;
+
+        // Sharp click bar snap
+        osc1.type = "square";
+        osc1.frequency.setValueAtTime(isError ? 400 : 3500, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 200 : 1750,
+          now + 0.008,
+        );
+
+        // Secondary click
+        osc2.type = "square";
+        osc2.frequency.setValueAtTime(isError ? 300 : 2800, now + 0.003);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 150 : 1400,
+          now + 0.012,
+        );
+
+        // Low thud
+        osc3.type = "sine";
+        osc3.frequency.setValueAtTime(isError ? 100 : 220, now + 0.005);
+        osc3.frequency.exponentialRampToValueAtTime(
+          isError ? 50 : 110,
+          now + 0.04,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.25, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.01);
+        gain2.gain.setValueAtTime(volume * 0.15, now + 0.003);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.015);
+        gain3.gain.setValueAtTime(volume * 0.12, now + 0.005);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        osc1.start(now);
+        osc1.stop(now + 0.01);
+        osc2.start(now + 0.003);
+        osc2.stop(now + 0.015);
+        osc3.start(now + 0.005);
+        osc3.stop(now + 0.04);
+        break;
+      }
+
+      case "silent-alpaca": {
+        // Silent Alpaca: muted linear with dampened sound
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain1);
+        filter.connect(gain2);
+        gain1.connect(ctx.destination);
+        gain2.connect(ctx.destination);
+
+        filter.type = "lowpass";
+        filter.frequency.value = 500;
+        filter.Q.value = 0.3;
+
+        // Muted thump
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(isError ? 120 : 200, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 60 : 100,
+          now + 0.05,
+        );
+
+        // Subtle cushion
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(isError ? 80 : 150, now);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 40 : 75,
+          now + 0.06,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.06, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain2.gain.setValueAtTime(volume * 0.04, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+        osc1.start(now);
+        osc1.stop(now + 0.05);
+        osc2.start(now);
+        osc2.stop(now + 0.06);
+        break;
+      }
+
+      case "membrane": {
+        // Membrane: mushy office keyboard with rubbery feel
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        const gain2 = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain1);
+        filter.connect(gain2);
+        gain1.connect(ctx.destination);
+        gain2.connect(ctx.destination);
+
+        filter.type = "lowpass";
+        filter.frequency.value = 350;
+        filter.Q.value = 0.4;
+
+        // Mushy press
+        osc1.type = "sine";
+        osc1.frequency.setValueAtTime(isError ? 180 : 280, now);
+        osc1.frequency.exponentialRampToValueAtTime(
+          isError ? 90 : 140,
+          now + 0.1,
+        );
+
+        // Rubber squish
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(isError ? 100 : 180, now + 0.02);
+        osc2.frequency.exponentialRampToValueAtTime(
+          isError ? 50 : 90,
+          now + 0.12,
+        );
+
+        gain1.gain.setValueAtTime(volume * 0.07, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(volume * 0.05, now + 0.03);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+        osc1.start(now);
+        osc1.stop(now + 0.1);
+        osc2.start(now + 0.02);
+        osc2.stop(now + 0.12);
+        break;
+      }
     }
   } catch {
     // Audio context not available or failed

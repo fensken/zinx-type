@@ -21,7 +21,17 @@ export type FontName =
   | "share-tech-mono"
   | "anonymous-pro"
   | "pt-mono"
-  | "major-mono";
+  | "major-mono"
+  | "victor-mono"
+  | "recursive-mono"
+  | "noto-sans-mono"
+  | "ubuntu-sans-mono"
+  | "oxygen-mono"
+  | "cutive-mono"
+  | "b612-mono"
+  | "xanh-mono"
+  | "syne-mono"
+  | "nova-mono";
 
 export interface FontOption {
   value: FontName;
@@ -62,6 +72,13 @@ export const useFontStore = create<FontStore>()(
     },
   ),
 );
+
+// O(1) lookup map for font class names
+const fontClassNameMap = new Map<FontName, string>();
+
+/** Get font className with O(1) lookup */
+export const getFontClassName = (font: FontName): string =>
+  fontClassNameMap.get(font) ?? "font-geist-mono";
 
 export const fontOptions: FontOption[] = [
   {
@@ -164,4 +181,60 @@ export const fontOptions: FontOption[] = [
     label: "Major Mono Display",
     className: "font-major-mono",
   },
+  // New fonts from Google Fonts
+  {
+    value: "victor-mono",
+    label: "Victor Mono",
+    className: "font-victor-mono",
+  },
+  {
+    value: "recursive-mono",
+    label: "Recursive Mono",
+    className: "font-recursive-mono",
+  },
+  {
+    value: "noto-sans-mono",
+    label: "Noto Sans Mono",
+    className: "font-noto-sans-mono",
+  },
+  {
+    value: "ubuntu-sans-mono",
+    label: "Ubuntu Sans Mono",
+    className: "font-ubuntu-sans-mono",
+  },
+  {
+    value: "oxygen-mono",
+    label: "Oxygen Mono",
+    className: "font-oxygen-mono",
+  },
+  {
+    value: "cutive-mono",
+    label: "Cutive Mono",
+    className: "font-cutive-mono",
+  },
+  {
+    value: "b612-mono",
+    label: "B612 Mono",
+    className: "font-b612-mono",
+  },
+  {
+    value: "xanh-mono",
+    label: "Xanh Mono",
+    className: "font-xanh-mono",
+  },
+  {
+    value: "syne-mono",
+    label: "Syne Mono",
+    className: "font-syne-mono",
+  },
+  {
+    value: "nova-mono",
+    label: "Nova Mono",
+    className: "font-nova-mono",
+  },
 ];
+
+// Populate the lookup map
+fontOptions.forEach((font) => {
+  fontClassNameMap.set(font.value, font.className);
+});

@@ -5,7 +5,7 @@ import { getRandomQuote } from "@/data/quotes";
 import { getRandomSnippetByDifficulty } from "@/data/code-snippets";
 import { useTypingStore } from "@/store/typingStore";
 import { useSettingsStore } from "@/store/settingsStore";
-import { useFontStore, fontOptions } from "@/store/fontStore";
+import { useFontStore, getFontClassName } from "@/store/fontStore";
 import { useSound } from "@/hooks/useSound";
 import { RotateCcw, AlertTriangle, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,53 +31,58 @@ const WordDisplay = memo(function WordDisplay({
   word,
   isActive,
   activeCharIdx,
+  onCharRef,
+  wordIdx,
 }: {
   word: Word;
   isActive: boolean;
   activeCharIdx: number;
+  onCharRef: (key: string, el: HTMLSpanElement | null) => void;
+  wordIdx: number;
 }) {
   return (
     <div className="flex relative leading-[32px]">
-      {word.chars.map((char, ci) => {
-        const isCurrentChar = isActive && ci === activeCharIdx;
-        return (
-          <span
-            key={ci}
-            className={`relative ${
-              char.status === "correct"
-                ? "text-primary"
-                : char.status === "incorrect"
-                  ? "text-destructive"
-                  : "text-muted-foreground"
-            }`}
-          >
-            {isCurrentChar && (
-              <span className="absolute left-0 top-0 w-[2px] h-full bg-caret animate-caret" />
-            )}
-            {char.value}
-          </span>
-        );
-      })}
+      {word.chars.map((char, ci) => (
+        <span
+          key={ci}
+          ref={(el) => onCharRef(`${wordIdx}-${ci}`, el)}
+          className={`relative ${
+            char.status === "correct"
+              ? "text-primary"
+              : char.status === "incorrect"
+                ? "text-destructive"
+                : "text-muted-foreground"
+          }`}
+        >
+          {char.value}
+        </span>
+      ))}
 
       {word.extraChars.map((char, i) => {
-        const isCurrentExtraChar =
-          isActive && i === activeCharIdx - word.chars.length;
+        const charIdx = word.chars.length + i;
         return (
-          <span key={`extra-${i}`} className="relative text-destructive/70">
-            {isCurrentExtraChar && (
-              <span className="absolute left-0 top-0 w-0.5 h-full bg-caret animate-caret" />
-            )}
+          <span
+            key={`extra-${i}`}
+            ref={(el) => onCharRef(`${wordIdx}-${charIdx}`, el)}
+            className="relative text-destructive/70"
+          >
             {char}
           </span>
         );
       })}
 
-      {/* Cursor at end of word */}
+      {/* End-of-word marker for cursor positioning */}
       {isActive &&
         activeCharIdx >= word.chars.length + word.extraChars.length && (
-          <span className="relative w-0">
-            <span className="absolute left-0 top-0 w-0.5 h-full bg-caret animate-caret" />
-          </span>
+          <span
+            ref={(el) =>
+              onCharRef(
+                `${wordIdx}-${word.chars.length + word.extraChars.length}`,
+                el,
+              )
+            }
+            className="relative w-0"
+          />
         )}
     </div>
   );
@@ -103,6 +108,26 @@ const TypingPractice = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const wordElementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const currentLineRef = useRef<number>(0);
+  const charRefsMap = useRef<Map<string, HTMLSpanElement>>(new Map());
+  const [cursorPos, setCursorPos] = useState<{ left: number; top: number }>({
+    left: 0,
+    top: 0,
+  });
+  const [cursorHeight, setCursorHeight] = useState(32);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Stable callback for setting char refs - won't cause WordDisplay re-renders
+  const handleCharRef = useCallback(
+    (key: string, el: HTMLSpanElement | null) => {
+      if (el) {
+        charRefsMap.current.set(key, el);
+      } else {
+        charRefsMap.current.delete(key);
+      }
+    },
+    [],
+  );
 
   const words = useTypingStore((state) => state.words);
   const wordIndex = useTypingStore((state) => state.wordIndex);
@@ -136,8 +161,7 @@ const TypingPractice = () => {
   const customText = useSettingsStore((state) => state.customText);
 
   const font = useFontStore((state) => state.font);
-  const fontClassName =
-    fontOptions.find((f) => f.value === font)?.className || "font-geist-mono";
+  const fontClassName = getFontClassName(font);
 
   const { playKeyPress, playError, playCompletion } = useSound();
 
@@ -156,7 +180,7 @@ const TypingPractice = () => {
       const snippet = getRandomSnippetByDifficulty(codeLanguage, difficulty);
       const fullCode = snippet.lines.join("\n");
       setQuoteSource(null);
-      resetCode(fullCode); // Use store's resetCode for code mode
+      resetCode(fullCode);
     } else if (mode === "custom") {
       // Custom text mode - use user provided text
       if (customText.trim()) {
@@ -192,6 +216,8 @@ const TypingPractice = () => {
     setScrollTop(0);
     currentLineRef.current = 0;
     wordElementsRef.current = [];
+    charRefsMap.current.clear();
+    setCursorPos({ left: 0, top: 0 });
   }, [
     mode,
     wordCount,
@@ -204,6 +230,7 @@ const TypingPractice = () => {
     includePunctuation,
     includeSpecialCharacters,
     reset,
+    resetCode,
   ]);
 
   const handleReset = useCallback(() => {
@@ -233,6 +260,69 @@ const TypingPractice = () => {
       currentLineRef.current = currentLine;
     }
   }, [wordIndex, words.length]);
+
+  // Update cursor position smoothly
+  useLayoutEffect(() => {
+    if (mode === "code") return; // Code mode has its own cursor
+
+    const charKey = `${wordIndex}-${charIndex}`;
+    const charEl = charRefsMap.current.get(charKey);
+    const containerEl = wordsContainerRef.current;
+
+    // Calculate position relative to the words container by walking up the offset chain
+    const getOffsetRelativeTo = (
+      el: HTMLElement,
+      container: HTMLElement,
+    ): { left: number; top: number } => {
+      let left = 0;
+      let top = 0;
+      let current: HTMLElement | null = el;
+
+      while (current && current !== container) {
+        left += current.offsetLeft;
+        top += current.offsetTop;
+        current = current.offsetParent as HTMLElement | null;
+      }
+
+      return { left, top };
+    };
+
+    if (charEl && containerEl) {
+      const pos = getOffsetRelativeTo(charEl, containerEl);
+      setCursorPos(pos);
+      setCursorHeight(charEl.offsetHeight);
+    } else if (words.length > 0 && wordIndex === 0 && charIndex === 0) {
+      // Initial position - find first char
+      const firstCharEl = charRefsMap.current.get("0-0");
+      if (firstCharEl && containerEl) {
+        const pos = getOffsetRelativeTo(firstCharEl, containerEl);
+        setCursorPos(pos);
+        setCursorHeight(firstCharEl.offsetHeight);
+      }
+    }
+  }, [wordIndex, charIndex, words, scrollTop, mode]);
+
+  // Reset typing timeout when cursor position changes - called from keyboard handler
+  const resetTypingTimeout = useCallback(() => {
+    setIsTyping(true);
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, 500);
+  }, []);
+
+  // Cleanup typing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Initialize on mount and regenerate when state is reset to empty (external reset like header click)
   /* eslint-disable react-hooks/set-state-in-effect -- Intentional initialization and state sync patterns */
@@ -361,6 +451,9 @@ const TypingPractice = () => {
       if (startTime === null) {
         startTimer();
       }
+
+      // Reset typing timeout to stop cursor blinking while typing
+      resetTypingTimeout();
 
       // Code mode - character-by-character typing
       if (mode === "code") {
@@ -541,6 +634,7 @@ const TypingPractice = () => {
       setCodeTypedChars,
       setCodeCursorPos,
       endTest,
+      resetTypingTimeout,
     ],
   );
 
@@ -713,16 +807,30 @@ const TypingPractice = () => {
               language={codeLanguage}
               typedChars={codeTypedChars}
               cursorPosition={codeCursorPos}
+              isTyping={isTyping}
             />
           ) : (
             /* Words wrapper - scrolls up */
             <div
               ref={wordsContainerRef}
-              className={`flex flex-wrap gap-x-2 sm:gap-x-3 font-medium gap-y-2 text-lg sm:text-xl md:text-2xl ${fontClassName} transition-transform duration-100 ease-out`}
+              className={`relative flex flex-wrap gap-x-2 sm:gap-x-3 font-medium gap-y-2 text-lg sm:text-xl md:text-2xl ${fontClassName} transition-transform duration-100 ease-out`}
               style={{
                 transform: `translateY(-${scrollTop}px)`,
               }}
             >
+              {/* Smooth cursor - only blinks when idle */}
+              {words.length > 0 && !endTime && (
+                <span
+                  className={`absolute w-[2px] bg-caret pointer-events-none transition-all duration-75 ease-out z-10 ${
+                    isTyping ? "" : "animate-caret"
+                  }`}
+                  style={{
+                    left: cursorPos.left,
+                    top: cursorPos.top,
+                    height: cursorHeight,
+                  }}
+                />
+              )}
               {words.map((word, wi) => (
                 <div
                   key={wi}
@@ -734,6 +842,8 @@ const TypingPractice = () => {
                     word={word}
                     isActive={wi === wordIndex}
                     activeCharIdx={charIndex}
+                    onCharRef={handleCharRef}
+                    wordIdx={wi}
                   />
                 </div>
               ))}

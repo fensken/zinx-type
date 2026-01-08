@@ -9,6 +9,7 @@ interface CodeTypingBlockProps {
   language: string;
   typedChars: string;
   cursorPosition: number;
+  isTyping?: boolean;
 }
 
 // Map our language ids to shiki language ids
@@ -91,11 +92,19 @@ function getShikiTheme(
 // Character status type
 type CharStatus = "pending" | "correct" | "incorrect" | "current";
 
+// Render a character with proper display - pure function, no need to recreate
+const renderChar = (char: string): string => {
+  if (char === "\t") return "    "; // 4 spaces for tab
+  if (char === " ") return "\u00A0"; // non-breaking space
+  return char;
+};
+
 const CodeTypingBlock = memo(function CodeTypingBlock({
   code,
   language,
   typedChars,
   cursorPosition,
+  isTyping = false,
 }: CodeTypingBlockProps) {
   const theme = useThemeStore((state) => state.theme);
   const [tokens, setTokens] = useState<ThemedToken[][] | null>(null);
@@ -103,7 +112,7 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
 
   const shikiTheme = getShikiTheme(theme);
 
-  // Get shiki tokens
+  // Get shiki tokens - only recalculate when code/language/theme changes
   useEffect(() => {
     let cancelled = false;
 
@@ -147,31 +156,24 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
     return positions;
   }, [lines]);
 
-  // Calculate character status
-  const getCharStatus = (
-    charIndex: number,
-    expectedChar: string,
-  ): CharStatus => {
-    if (charIndex === cursorPosition) {
-      return "current";
+  // Pre-compute all character statuses in one pass - O(n) instead of O(n) per render
+  const charStatuses = useMemo(() => {
+    const statuses: CharStatus[] = new Array(code.length);
+    for (let i = 0; i < code.length; i++) {
+      if (i === cursorPosition) {
+        statuses[i] = "current";
+      } else if (i >= typedChars.length) {
+        statuses[i] = "pending";
+      } else {
+        statuses[i] = typedChars[i] === code[i] ? "correct" : "incorrect";
+      }
     }
-    if (charIndex >= typedChars.length) {
-      return "pending";
-    }
+    return statuses;
+  }, [code, typedChars, cursorPosition]);
 
-    const typedChar = typedChars[charIndex];
-    return typedChar === expectedChar ? "correct" : "incorrect";
-  };
-
-  // Render a character with proper display
-  const renderChar = (char: string): string => {
-    if (char === "\t") {
-      return "    "; // 4 spaces for tab
-    }
-    if (char === " ") {
-      return "\u00A0"; // non-breaking space
-    }
-    return char;
+  // Fast O(1) lookup for character status
+  const getCharStatus = (charIndex: number): CharStatus => {
+    return charStatuses[charIndex] ?? "pending";
   };
 
   if (isLoading || !tokens) {
@@ -205,12 +207,13 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
                   {lineTokens.length === 0 ? (
                     // Empty line - show cursor if needed
                     (() => {
-                      const emptyLinePos = lineStartPos;
-                      const status = getCharStatus(emptyLinePos, "\n");
+                      const status = getCharStatus(lineStartPos);
                       return (
                         <span className="relative inline-block min-w-[8px]">
                           {status === "current" && (
-                            <span className="absolute left-0 top-0 w-[2px] h-full bg-primary animate-caret z-10" />
+                            <span
+                              className={`absolute left-0 top-0 w-[2px] h-full bg-primary z-10 ${isTyping ? "" : "animate-caret"}`}
+                            />
                           )}
                           {status === "correct" && (
                             <span className="absolute inset-0 bg-green-500/30" />
@@ -221,25 +224,23 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
                     })()
                   ) : (
                     <>
-                      {lineTokens.map((token, tokenIndex) => {
+                      {lineTokens.map((token, tokenIndex) =>
                         // Process each character individually but group by token for color
-                        return token.content.split("").map((char, charIdx) => {
+                        token.content.split("").map((char, charIdx) => {
                           const globalCharIndex = lineStartPos + lineCharOffset;
                           lineCharOffset++;
 
-                          const status = getCharStatus(globalCharIndex, char);
+                          const status = getCharStatus(globalCharIndex);
 
                           // Determine styles based on status
-                          let bgStyle = "";
-                          let textOpacity = "";
-
-                          if (status === "correct") {
-                            bgStyle = "bg-green-500/30";
-                          } else if (status === "incorrect") {
-                            bgStyle = "bg-red-500/50";
-                          } else if (status === "pending") {
-                            textOpacity = "opacity-50";
-                          }
+                          const bgStyle =
+                            status === "correct"
+                              ? "bg-green-500/30"
+                              : status === "incorrect"
+                                ? "bg-red-500/50"
+                                : "";
+                          const textOpacity =
+                            status === "pending" ? "opacity-50" : "";
 
                           return (
                             <span
@@ -248,23 +249,27 @@ const CodeTypingBlock = memo(function CodeTypingBlock({
                               style={{ color: token.color }}
                             >
                               {status === "current" && (
-                                <span className="absolute left-0 top-0 w-[2px] h-full bg-primary animate-caret z-10" />
+                                <span
+                                  className={`absolute left-0 top-0 w-[2px] h-full bg-primary z-10 ${isTyping ? "" : "animate-caret"}`}
+                                />
                               )}
                               {renderChar(char)}
                             </span>
                           );
-                        });
-                      })}
+                        }),
+                      )}
                       {/* Newline cursor at end of line */}
                       {!isLastLine &&
                         lineText.length > 0 &&
                         (() => {
                           const newlinePos = lineStartPos + lineText.length;
-                          const status = getCharStatus(newlinePos, "\n");
+                          const status = getCharStatus(newlinePos);
                           return (
                             <span className="relative">
                               {status === "current" && (
-                                <span className="absolute left-0 top-0 w-[2px] h-full bg-primary animate-caret z-10" />
+                                <span
+                                  className={`absolute left-0 top-0 w-[2px] h-full bg-primary z-10 ${isTyping ? "" : "animate-caret"}`}
+                                />
                               )}
                               {status === "correct" && (
                                 <span className="inline-block w-1 bg-green-500/30">

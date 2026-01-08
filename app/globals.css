@@ -587,6 +587,268 @@
     --error-extra: #f07178aa;
 }
 
+/* Theme: Claude - Anthropic's warm aesthetic with grainy texture */
+.theme-claude {
+    --background: #1a1915;
+    --foreground: #e8e4dc;
+    --card: #24221c;
+    --card-foreground: #e8e4dc;
+    --popover: #24221c;
+    --popover-foreground: #e8e4dc;
+    --primary: #da7756;
+    --primary-foreground: #1a1915;
+    --secondary: #2e2b24;
+    --secondary-foreground: #e8e4dc;
+    --muted: #2e2b24;
+    --muted-foreground: #9c9688;
+    --accent: #2e2b24;
+    --accent-foreground: #e8e4dc;
+    --destructive: #e05252;
+    --border: #3d3930;
+    --input: #2e2b24;
+    --ring: #da7756;
+    --caret: #da7756;
+    --error: #e05252;
+    --error-extra: #e05252aa;
+}
+
+/* Theme: Vercel - Clean minimal black/white */
+.theme-vercel {
+    --background: #000000;
+    --foreground: #ededed;
+    --card: #0a0a0a;
+    --card-foreground: #ededed;
+    --popover: #0a0a0a;
+    --popover-foreground: #ededed;
+    --primary: #ffffff;
+    --primary-foreground: #000000;
+    --secondary: #1a1a1a;
+    --secondary-foreground: #ededed;
+    --muted: #1a1a1a;
+    --muted-foreground: #888888;
+    --accent: #1a1a1a;
+    --accent-foreground: #ededed;
+    --destructive: #ff4444;
+    --border: #333333;
+    --input: #1a1a1a;
+    --ring: #ffffff;
+    --caret: #ffffff;
+    --error: #ff4444;
+    --error-extra: #ff4444aa;
+}
+
+/* Theme: Espresso - Rich dark coffee */
+.theme-espresso {
+    --background: #1c1210;
+    --foreground: #e6ddd1;
+    --card: #261a16;
+    --card-foreground: #e6ddd1;
+    --popover: #261a16;
+    --popover-foreground: #e6ddd1;
+    --primary: #c9a57c;
+    --primary-foreground: #1c1210;
+    --secondary: #30221c;
+    --secondary-foreground: #e6ddd1;
+    --muted: #30221c;
+    --muted-foreground: #8a7968;
+    --accent: #30221c;
+    --accent-foreground: #e6ddd1;
+    --destructive: #d45c5c;
+    --border: #4a3830;
+    --input: #30221c;
+    --ring: #c9a57c;
+    --caret: #c9a57c;
+    --error: #d45c5c;
+    --error-extra: #d45c5caa;
+}
+
+/* Theme: Latte - Light coffee cream */
+.theme-latte {
+    --background: #f5f0e8;
+    --foreground: #3d3128;
+    --card: #ebe4d8;
+    --card-foreground: #3d3128;
+    --popover: #ebe4d8;
+    --popover-foreground: #3d3128;
+    --primary: #8b6b4f;
+    --primary-foreground: #f5f0e8;
+    --secondary: #e0d8ca;
+    --secondary-foreground: #3d3128;
+    --muted: #e0d8ca;
+    --muted-foreground: #7a6b5c;
+    --accent: #e0d8ca;
+    --accent-foreground: #3d3128;
+    --destructive: #c44d4d;
+    --border: #c8bfb0;
+    --input: #e0d8ca;
+    --ring: #8b6b4f;
+    --caret: #8b6b4f;
+    --error: #c44d4d;
+    --error-extra: #c44d4daa;
+}
+
+/* Theme: Mocha - Deep chocolate tones */
+.theme-mocha {
+    --background: #1e1714;
+    --foreground: #f0e6db;
+    --card: #28201a;
+    --card-foreground: #f0e6db;
+    --popover: #28201a;
+    --popover-foreground: #f0e6db;
+    --primary: #d4a574;
+    --primary-foreground: #1e1714;
+    --secondary: #332820;
+    --secondary-foreground: #f0e6db;
+    --muted: #332820;
+    --muted-foreground: #937a64;
+    --accent: #332820;
+    --accent-foreground: #f0e6db;
+    --destructive: #d85a5a;
+    --border: #4d3d30;
+    --input: #332820;
+    --ring: #d4a574;
+    --caret: #d4a574;
+    --error: #d85a5a;
+    --error-extra: #d85a5aaa;
+}
+
+/* Theme: Cappuccino - Warm frothy browns */
+.theme-cappuccino {
+    --background: #2a211b;
+    --foreground: #f5ede4;
+    --card: #352a22;
+    --card-foreground: #f5ede4;
+    --popover: #352a22;
+    --popover-foreground: #f5ede4;
+    --primary: #e8c9a8;
+    --primary-foreground: #2a211b;
+    --secondary: #40332a;
+    --secondary-foreground: #f5ede4;
+    --muted: #40332a;
+    --muted-foreground: #a08a74;
+    --accent: #40332a;
+    --accent-foreground: #f5ede4;
+    --destructive: #dc6060;
+    --border: #5a4838;
+    --input: #40332a;
+    --ring: #e8c9a8;
+    --caret: #e8c9a8;
+    --error: #dc6060;
+    --error-extra: #dc6060aa;
+}
+
+/* Theme: Macchiato - Stained milk tones */
+.theme-macchiato {
+    --background: #24201e;
+    --foreground: #ede5db;
+    --card: #2e2926;
+    --card-foreground: #ede5db;
+    --popover: #2e2926;
+    --popover-foreground: #ede5db;
+    --primary: #f5d5b8;
+    --primary-foreground: #24201e;
+    --secondary: #38322e;
+    --secondary-foreground: #ede5db;
+    --muted: #38322e;
+    --muted-foreground: #9a8e82;
+    --accent: #38322e;
+    --accent-foreground: #ede5db;
+    --destructive: #e06565;
+    --border: #4e4640;
+    --input: #38322e;
+    --ring: #f5d5b8;
+    --caret: #f5d5b8;
+    --error: #e06565;
+    --error-extra: #e06565aa;
+}
+
+/* Theme: Affogato - Espresso meets cream */
+.theme-affogato {
+    --background: #18140f;
+    --foreground: #fffaf3;
+    --card: #221c15;
+    --card-foreground: #fffaf3;
+    --popover: #221c15;
+    --popover-foreground: #fffaf3;
+    --primary: #f0c896;
+    --primary-foreground: #18140f;
+    --secondary: #2c241a;
+    --secondary-foreground: #fffaf3;
+    --muted: #2c241a;
+    --muted-foreground: #a08a6e;
+    --accent: #2c241a;
+    --accent-foreground: #fffaf3;
+    --destructive: #e85858;
+    --border: #403420;
+    --input: #2c241a;
+    --ring: #f0c896;
+    --caret: #f0c896;
+    --error: #e85858;
+    --error-extra: #e85858aa;
+}
+
+/* Theme: Cold Brew - Dark smooth cold tones */
+.theme-cold-brew {
+    --background: #0f0d0b;
+    --foreground: #d4ccc2;
+    --card: #1a1614;
+    --card-foreground: #d4ccc2;
+    --popover: #1a1614;
+    --popover-foreground: #d4ccc2;
+    --primary: #a89076;
+    --primary-foreground: #0f0d0b;
+    --secondary: #24201c;
+    --secondary-foreground: #d4ccc2;
+    --muted: #24201c;
+    --muted-foreground: #6e6458;
+    --accent: #24201c;
+    --accent-foreground: #d4ccc2;
+    --destructive: #c85050;
+    --border: #3a3430;
+    --input: #24201c;
+    --ring: #a89076;
+    --caret: #a89076;
+    --error: #c85050;
+    --error-extra: #c85050aa;
+}
+
+/* Theme: Matcha - Japanese green tea aesthetic */
+.theme-matcha {
+    --background: #1a1f1a;
+    --foreground: #e8f0e0;
+    --card: #232a23;
+    --card-foreground: #e8f0e0;
+    --popover: #232a23;
+    --popover-foreground: #e8f0e0;
+    --primary: #8fbc6a;
+    --primary-foreground: #1a1f1a;
+    --secondary: #2c352c;
+    --secondary-foreground: #e8f0e0;
+    --muted: #2c352c;
+    --muted-foreground: #6a7a5c;
+    --accent: #2c352c;
+    --accent-foreground: #e8f0e0;
+    --destructive: #d06050;
+    --border: #3c4a3c;
+    --input: #2c352c;
+    --ring: #8fbc6a;
+    --caret: #8fbc6a;
+    --error: #d06050;
+    --error-extra: #d06050aa;
+}
+
+/* Grainy texture overlay for coffee aesthetic themes */
+.grainy-bg::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    mix-blend-mode: overlay;
+}
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
@@ -707,4 +969,45 @@
 
 .font-major-mono {
     font-family: var(--font-major-mono), monospace;
+}
+
+/* New font classes */
+.font-victor-mono {
+    font-family: var(--font-victor-mono), monospace;
+}
+
+.font-recursive-mono {
+    font-family: var(--font-recursive-mono), monospace;
+}
+
+.font-noto-sans-mono {
+    font-family: var(--font-noto-sans-mono), monospace;
+}
+
+.font-ubuntu-sans-mono {
+    font-family: var(--font-ubuntu-sans-mono), monospace;
+}
+
+.font-oxygen-mono {
+    font-family: var(--font-oxygen-mono), monospace;
+}
+
+.font-cutive-mono {
+    font-family: var(--font-cutive-mono), monospace;
+}
+
+.font-b612-mono {
+    font-family: var(--font-b612-mono), monospace;
+}
+
+.font-xanh-mono {
+    font-family: var(--font-xanh-mono), monospace;
+}
+
+.font-syne-mono {
+    font-family: var(--font-syne-mono), monospace;
+}
+
+.font-nova-mono {
+    font-family: var(--font-nova-mono), monospace;
 }

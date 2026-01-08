@@ -21,7 +21,17 @@ export type ThemeName =
   | "catppuccin"
   | "solarized"
   | "one-dark"
-  | "ayu-dark";
+  | "ayu-dark"
+  | "claude"
+  | "vercel"
+  | "espresso"
+  | "latte"
+  | "mocha"
+  | "cappuccino"
+  | "macchiato"
+  | "affogato"
+  | "cold-brew"
+  | "matcha";
 
 export interface ThemeOption {
   value: ThemeName;
@@ -31,6 +41,7 @@ export interface ThemeOption {
     primary: string;
     text: string;
   };
+  grainy?: boolean;
 }
 
 interface ThemeState {
@@ -155,5 +166,66 @@ export const themeOptions: ThemeOption[] = [
     value: "ayu-dark",
     label: "Ayu Dark",
     colors: { bg: "#0d1017", primary: "#e6b450", text: "#bfbdb6" },
+  },
+  // New themes with grainy backgrounds and coffee aesthetics
+  {
+    value: "claude",
+    label: "Claude",
+    colors: { bg: "#1a1915", primary: "#da7756", text: "#e8e4dc" },
+    grainy: true,
+  },
+  {
+    value: "vercel",
+    label: "Vercel",
+    colors: { bg: "#000000", primary: "#ffffff", text: "#ededed" },
+    grainy: true,
+  },
+  {
+    value: "espresso",
+    label: "Espresso",
+    colors: { bg: "#1c1210", primary: "#c9a57c", text: "#e6ddd1" },
+    grainy: true,
+  },
+  {
+    value: "latte",
+    label: "Latte",
+    colors: { bg: "#f5f0e8", primary: "#8b6b4f", text: "#3d3128" },
+    grainy: true,
+  },
+  {
+    value: "mocha",
+    label: "Mocha",
+    colors: { bg: "#1e1714", primary: "#d4a574", text: "#f0e6db" },
+    grainy: true,
+  },
+  {
+    value: "cappuccino",
+    label: "Cappuccino",
+    colors: { bg: "#2a211b", primary: "#e8c9a8", text: "#f5ede4" },
+    grainy: true,
+  },
+  {
+    value: "macchiato",
+    label: "Macchiato",
+    colors: { bg: "#24201e", primary: "#f5d5b8", text: "#ede5db" },
+    grainy: true,
+  },
+  {
+    value: "affogato",
+    label: "Affogato",
+    colors: { bg: "#18140f", primary: "#f0c896", text: "#fffaf3" },
+    grainy: true,
+  },
+  {
+    value: "cold-brew",
+    label: "Cold Brew",
+    colors: { bg: "#0f0d0b", primary: "#a89076", text: "#d4ccc2" },
+    grainy: true,
+  },
+  {
+    value: "matcha",
+    label: "Matcha",
+    colors: { bg: "#1a1f1a", primary: "#8fbc6a", text: "#e8f0e0" },
+    grainy: true,
   },
 ];

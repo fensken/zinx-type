@@ -4,7 +4,7 @@ import { Palette } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useThemeStore } from "@/store/themeStore";
+import { useThemeStore, themeOptions } from "@/store/themeStore";
 import CommandPalette from "./command-palette";
 
 const ThemeSwitcher = () => {
@@ -15,12 +15,17 @@ const ThemeSwitcher = () => {
   // Apply theme to document
   useEffect(() => {
     const root = document.documentElement;
-    // Remove any existing theme classes
+    // Remove any existing theme classes and grainy class
     root.classList.forEach((cls) => {
       if (cls.startsWith("theme-")) {
         root.classList.remove(cls);
       }
     });
+    root.classList.remove("grainy-bg");
+
+    // Check if the current theme has grainy property
+    const currentTheme = themeOptions.find((t) => t.value === theme);
+    const isGrainy = currentTheme?.grainy ?? false;
 
     if (theme === "light") {
       setNextTheme("light");
@@ -32,6 +37,11 @@ const ThemeSwitcher = () => {
       setNextTheme("dark");
       root.classList.add("dark");
       root.classList.add(`theme-${theme}`);
+    }
+
+    // Add grainy class for coffee aesthetic themes
+    if (isGrainy) {
+      root.classList.add("grainy-bg");
     }
   }, [theme, setNextTheme]);
 

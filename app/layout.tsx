@@ -21,6 +21,16 @@ import {
   Anonymous_Pro,
   PT_Mono,
   Major_Mono_Display,
+  Victor_Mono,
+  Recursive,
+  Noto_Sans_Mono,
+  Ubuntu_Sans_Mono,
+  Oxygen_Mono,
+  Cutive_Mono,
+  B612_Mono,
+  Xanh_Mono,
+  Syne_Mono,
+  Nova_Mono,
 } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/global/theme-provider";
@@ -141,6 +151,63 @@ const majorMono = Major_Mono_Display({
   variable: "--font-major-mono",
 });
 
+// New fonts
+const victorMono = Victor_Mono({
+  subsets: ["latin"],
+  variable: "--font-victor-mono",
+});
+
+const recursiveMono = Recursive({
+  subsets: ["latin"],
+  variable: "--font-recursive-mono",
+});
+
+const notoSansMono = Noto_Sans_Mono({
+  subsets: ["latin"],
+  variable: "--font-noto-sans-mono",
+});
+
+const ubuntuSansMono = Ubuntu_Sans_Mono({
+  subsets: ["latin"],
+  variable: "--font-ubuntu-sans-mono",
+});
+
+const oxygenMono = Oxygen_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-oxygen-mono",
+});
+
+const cutiveMono = Cutive_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-cutive-mono",
+});
+
+const b612Mono = B612_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-b612-mono",
+});
+
+const xanhMono = Xanh_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-xanh-mono",
+});
+
+const syneMono = Syne_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-syne-mono",
+});
+
+const novaMono = Nova_Mono({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-nova-mono",
+});
+
 const fontVariables = [
   geistSans.variable,
   geistMono.variable,
@@ -163,6 +230,16 @@ const fontVariables = [
   anonymousPro.variable,
   ptMono.variable,
   majorMono.variable,
+  victorMono.variable,
+  recursiveMono.variable,
+  notoSansMono.variable,
+  ubuntuSansMono.variable,
+  oxygenMono.variable,
+  cutiveMono.variable,
+  b612Mono.variable,
+  xanhMono.variable,
+  syneMono.variable,
+  novaMono.variable,
 ].join(" ");
 
 export const metadata: Metadata = {
@@ -241,6 +318,8 @@ export const metadata: Metadata = {
 const preHydrationScript = `
   (function() {
     var root = document.documentElement;
+    // Themes with grainy background
+    var grainyThemes = ['claude', 'vercel', 'espresso', 'latte', 'mocha', 'cappuccino', 'macchiato', 'affogato', 'cold-brew', 'matcha'];
     try {
       // Theme
       var themeStored = localStorage.getItem('zinx-theme');
@@ -256,6 +335,10 @@ const preHydrationScript = `
             if (theme !== 'dark') {
               root.classList.add('theme-' + theme);
             }
+          }
+          // Add grainy class for coffee aesthetic themes
+          if (grainyThemes.indexOf(theme) !== -1) {
+            root.classList.add('grainy-bg');
           }
         }
       }

@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { getModeCategory, type ModeCategory, type TestResult } from "./historyStore";
+import { describe, it, expect } from "vitest";
+import {
+  getModeCategory,
+  type ModeCategory,
+  type TestResult,
+} from "./historyStore";
 
 describe("historyStore", () => {
   describe("getModeCategory", () => {
@@ -203,15 +207,17 @@ describe("historyStore", () => {
 
     it("should calculate average accuracy correctly", () => {
       const accuracies = [90, 92, 94, 96, 98];
-      const avg =
-        accuracies.reduce((sum, a) => sum + a, 0) / accuracies.length;
+      const avg = accuracies.reduce((sum, a) => sum + a, 0) / accuracies.length;
 
       expect(avg).toBe(94);
     });
 
     it("should return 0 for empty results", () => {
       const results: number[] = [];
-      const avg = results.length === 0 ? 0 : results.reduce((s, r) => s + r, 0) / results.length;
+      const avg =
+        results.length === 0
+          ? 0
+          : results.reduce((s, r) => s + r, 0) / results.length;
 
       expect(avg).toBe(0);
     });
@@ -233,7 +239,6 @@ describe("historyStore", () => {
       const today = new Date("2024-01-15").getTime();
       const yesterday = new Date("2024-01-14").getTime();
 
-      const todayStr = getDateString(today);
       const yesterdayStr = getDateString(yesterday);
       const expectedYesterday = getDateString(today - 86400000);
 
@@ -253,7 +258,12 @@ describe("historyStore", () => {
 
   describe("personal best tracking", () => {
     it("should identify new personal best", () => {
-      const currentBest = { wpm: 80, accuracy: 95, timestamp: Date.now(), mode: "words 25" };
+      const currentBest = {
+        wpm: 80,
+        accuracy: 95,
+        timestamp: Date.now(),
+        mode: "words 25",
+      };
       const newResult = { wpm: 85, accuracy: 96 };
 
       const isNewBest = newResult.wpm > currentBest.wpm;
@@ -261,7 +271,12 @@ describe("historyStore", () => {
     });
 
     it("should not identify lower score as personal best", () => {
-      const currentBest = { wpm: 80, accuracy: 95, timestamp: Date.now(), mode: "words 25" };
+      const currentBest = {
+        wpm: 80,
+        accuracy: 95,
+        timestamp: Date.now(),
+        mode: "words 25",
+      };
       const newResult = { wpm: 75, accuracy: 90 };
 
       const isNewBest = newResult.wpm > currentBest.wpm;
@@ -269,10 +284,15 @@ describe("historyStore", () => {
     });
 
     it("should handle first result as personal best", () => {
-      const currentBest = null;
+      const currentBest = null as { wpm: number; accuracy: number } | null;
       const newResult = { wpm: 70, accuracy: 92 };
 
-      const isNewBest = !currentBest || newResult.wpm > currentBest.wpm;
+      let isNewBest: boolean;
+      if (currentBest === null) {
+        isNewBest = true;
+      } else {
+        isNewBest = newResult.wpm > currentBest.wpm;
+      }
       expect(isNewBest).toBe(true);
     });
   });
